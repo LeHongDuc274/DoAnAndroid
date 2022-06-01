@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:id="@+id/ll_header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:id="@+id/iv_product"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_margin="6dp"
+            android:src="@color/white" />
+
+        <LinearLayout
+            android:id="@+id/ll_content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_gravity="center_vertical"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tv_product"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:text="tv_product"
+                android:textColor="@color/white"
+                android:textSize="10sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tv_per_price"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:text="tv_per_price"
+                android:textColor="@color/white"
+                android:textSize="8sp" />
+        </LinearLayout>
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end|center_vertical"
+            app:cardBackgroundColor="@color/color_background_item"
+            app:cardCornerRadius="4dp"
+            android:layout_marginEnd="8dp"
+            app:cardElevation="2dp"
+            app:strokeColor="@color/teal_200"
+            app:strokeWidth="1dp">
+
+            <TextView
+                android:id="@+id/tv_count"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginHorizontal="4dp"
+                android:text="12"
+                android:textColor="@color/white"
+                android:textSize="8sp" />
+        </com.google.android.material.card.MaterialCardView>
+
+
+        <TextView
+            android:id="@+id/tv_price"
+            android:layout_width="50dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end|center_vertical"
+            android:layout_marginEnd="8dp"
+            android:text="123.000 vnd"
+            android:textColor="#B32424"
+            android:textSize="8sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="4dp"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/tv_note"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="start"
+            android:layout_weight="1"
+            android:background="@drawable/background_buttom"
+            android:backgroundTint="@color/color_background_grey"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:padding="8dp"
+            android:paddingStart="12dp"
+            android:text="Note: thixxxxxxxxx    xxx"
+            android:textColor="@color/white"
+            android:textSize="10sp" />
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cv_delete"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_gravity="end|center_vertical"
+            app:cardBackgroundColor="@color/color_background_item"
+            app:cardCornerRadius="4dp"
+            app:cardElevation="2dp"
+            app:strokeColor="@color/teal_200"
+            app:strokeWidth="1dp">
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:padding="4dp"
+                android:src="@drawable/delete" />
+        </com.google.android.material.card.MaterialCardView>
+    </LinearLayout>
+</LinearLayout>
+
