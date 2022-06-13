@@ -2,7 +2,6 @@ package com.example.myapplication.ui.adapter
 
 import android.content.Context
 import android.graphics.Color
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
@@ -20,7 +19,7 @@ class CategoryTabAdapter(private val context: Context) :
     inner class ViewHolder(val binding: CategoryTabItemBinding) :
         RecyclerView.ViewHolder(binding.root) {
         fun bind() {
-            binding.tvCategory.text = listCategories[layoutPosition].name
+            binding.tvCategory.text = listCategories[layoutPosition].name_type
             if (layoutPosition == selectedPos) {
                 binding.tvCategory.setTextColor(ContextCompat.getColor(context, R.color.color_red))
             } else {
@@ -38,7 +37,6 @@ class CategoryTabAdapter(private val context: Context) :
             selectedPos = holder.layoutPosition
             notifyItemChanged(tempPos)
             notifyItemChanged(selectedPos)
-            Log.e("tagzz",selectedPos.toString())
             onClick?.invoke(listCategories[holder.layoutPosition])
         }
         return holder
@@ -51,7 +49,9 @@ class CategoryTabAdapter(private val context: Context) :
     override fun getItemCount() = listCategories.size
 
     fun setData(list: MutableList<CategoriesEntity>) {
-        listCategories = list
+        listCategories.clear()
+        listCategories.addAll(list)
+        listCategories.add(0, CategoriesEntity(-1, "All"))
         notifyDataSetChanged()
     }
 

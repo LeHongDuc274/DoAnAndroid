@@ -1,6 +1,7 @@
 package com.example.myapplication.ui.admin
 
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -8,15 +9,16 @@ import android.view.ViewGroup
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.myapplication.databinding.FragmentHomeBinding
+import com.example.myapplication.core.model.ProductEntity
+import com.example.myapplication.databinding.FragmentProductManagerBinding
 import com.example.myapplication.ext.collectFlow
 import com.example.myapplication.ui.adapter.CategoryTabAdapter
 import com.example.myapplication.ui.adapter.ProductManagerAdapter
 import com.example.myapplication.viewmodel.CustomerViewModel
 
 
-class HomeFragment : Fragment() {
-    private var _binding: FragmentHomeBinding? = null
+class ProductManagerFragment : Fragment() {
+    private var _binding: FragmentProductManagerBinding? = null
     private val binding get() = _binding!!
     private val prAdapter = ProductManagerAdapter()
     private lateinit var cateAdapter: CategoryTabAdapter
@@ -25,7 +27,7 @@ class HomeFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        _binding = FragmentHomeBinding.inflate(inflater, container, false)
+        _binding = FragmentProductManagerBinding.inflate(inflater, container, false)
         cmViewModel = ViewModelProvider(requireActivity())[CustomerViewModel::class.java]
         cateAdapter = CategoryTabAdapter(requireContext())
         return binding.root
@@ -39,14 +41,24 @@ class HomeFragment : Fragment() {
 
     private fun initListener() {
         collectFlow(cmViewModel.listProducts) {
-            prAdapter.setData(it)
+            cmViewModel.setListProductByCategory()
         }
         collectFlow(cmViewModel.listCategories) {
             cateAdapter.setData(it)
         }
-
+        collectFlow(cmViewModel.listProductFilter){
+            prAdapter.setData(it)
+        }
         cateAdapter.setOnClickItem {
+            cmViewModel.setListProductByCategory(it.id)
+        }
 
+        prAdapter.onClick {
+            if (it.id == -1){
+                addNewProduct()
+            } else {
+                editProduct(it)
+            }
         }
 
         binding.tvManagerCategories.setOnClickListener {
@@ -65,6 +77,15 @@ class HomeFragment : Fragment() {
                 LinearLayoutManager(requireActivity(), LinearLayoutManager.HORIZONTAL, false)
             adapter = cateAdapter
         }
+    }
+
+    private fun addNewProduct(){
+        val fm = childFragmentManager
+        ProductFormFragment().show(fm, null)
+    }
+
+    private fun editProduct(product: ProductEntity){
+
     }
 
     override fun onDestroy() {

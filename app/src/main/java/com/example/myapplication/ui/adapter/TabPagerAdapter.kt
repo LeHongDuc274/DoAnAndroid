@@ -5,7 +5,7 @@ import androidx.fragment.app.FragmentStatePagerAdapter
 import androidx.viewpager.widget.PagerAdapter
 import com.example.myapplication.core.TabItem
 import com.example.myapplication.ui.admin.ChartFragment
-import com.example.myapplication.ui.admin.HomeFragment
+import com.example.myapplication.ui.admin.ProductManagerFragment
 import com.example.myapplication.ui.admin.OrderManagerFragment
 import com.example.myapplication.ui.admin.SettingFragment
 
@@ -14,7 +14,7 @@ class TabPagerAdapter(fragmentManager: FragmentManager, private val tabItems: Li
 
     @Suppress("MagicNumber")
     override fun getItem(position: Int) = when (position) {
-        0 -> HomeFragment()
+        0 -> ProductManagerFragment()
         1 -> OrderManagerFragment()
         2 -> ChartFragment()
         else -> SettingFragment()

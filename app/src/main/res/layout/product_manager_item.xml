@@ -16,10 +16,13 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <ImageView
+            android:layout_marginVertical="24dp"
             android:id="@+id/iv_product"
-            android:layout_width="56dp"
-            android:layout_height="56dp"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:adjustViewBounds="true"
             android:src="@drawable/product2"
+            android:scaleType="centerInside"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />

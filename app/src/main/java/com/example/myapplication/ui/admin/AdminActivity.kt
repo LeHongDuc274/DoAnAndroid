@@ -17,7 +17,6 @@ class AdminActivity : AppCompatActivity() {
         binding = ActivityAdminBinding.inflate(layoutInflater)
         setContentView(binding.root)
         initViews()
-        Log.e("tag22", "ccc")
     }
 
     private fun initViews() {

@@ -15,32 +15,31 @@ class MainActivity : AppCompatActivity() {
             getString(R.string.shared_file_name), Context.MODE_PRIVATE
         ) ?: return
 
-        val role = sharedPref.getString(getString(R.string.key_role), "")
+        val role = sharedPref.getInt(getString(R.string.key_role), -1)
         val accessToken = sharedPref.getString(getString(R.string.key_access_token), "")
 
-        if (role!!.isBlank() || accessToken!!.isBlank()) {
-            Log.e("tagPref", "empty")
+        if (accessToken!!.isBlank()) {
             val intent = Intent(this, LoginActivity::class.java)
             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
             startActivity(intent)
         } else {
             when (role) {
-                "admin" -> {
+                0 -> {
                     val intent = Intent(this, AdminActivity::class.java)
                     intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                     startActivity(intent)
                 }
-                "table" -> {
+                3 -> {
                     val intent = Intent(this, CustomerActivity::class.java)
                     intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                     startActivity(intent)
                 }
 
-                "staff" -> {
+                1 -> {
 
                 }
 
-                "kitchen" -> {
+                2 -> {
 
                 }
                 else -> {

@@ -1,15 +1,21 @@
 package com.example.myapplication.ui.adapter
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.MultiTransformation
+import com.bumptech.glide.load.resource.bitmap.CenterCrop
+import com.bumptech.glide.load.resource.bitmap.CircleCrop
+import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.example.myapplication.core.model.ProductEntity
 import com.example.myapplication.databinding.ProductManagerItemBinding
 
 class ProductManagerAdapter : RecyclerView.Adapter<ProductManagerAdapter.ViewHolder>() {
     private var listProduct = mutableListOf<ProductEntity>()
-
+    private var onItemClick : ((ProductEntity) -> Unit)? = null
     inner class ViewHolder(val binding: ProductManagerItemBinding) :
         RecyclerView.ViewHolder(binding.root) {
         fun bind() {
@@ -31,6 +37,8 @@ class ProductManagerAdapter : RecyclerView.Adapter<ProductManagerAdapter.ViewHol
                 binding.tvNew.visibility = View.INVISIBLE
                 binding.tvName.text = listProduct[layoutPosition].name
                 binding.tvPrice.text = listProduct[layoutPosition].price.toString() + " vnđ"
+                val url = listProduct[layoutPosition].image_url
+                Glide.with(binding.ivProduct.context).load(url).circleCrop().into(binding.ivProduct)
             }
         }
     }
@@ -44,7 +52,9 @@ class ProductManagerAdapter : RecyclerView.Adapter<ProductManagerAdapter.ViewHol
     }
 
     private fun initListener(binding: ProductManagerItemBinding, holder: ViewHolder) {
-
+        holder.itemView.setOnClickListener {
+            onItemClick?.invoke(listProduct[holder.layoutPosition])
+        }
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
@@ -57,8 +67,12 @@ class ProductManagerAdapter : RecyclerView.Adapter<ProductManagerAdapter.ViewHol
 
     fun setData(list: List<ProductEntity>) {
         listProduct = list.toMutableList()
-        listProduct.add(0, ProductEntity("", -1, 0, "", 0))
+        listProduct.add(0, ProductEntity(-1, "", "", 0, 1,-1,null,"",""))
         notifyDataSetChanged()
+    }
+
+    fun onClick(action: (ProductEntity)->Unit){
+        onItemClick = action
     }
 
     companion object {

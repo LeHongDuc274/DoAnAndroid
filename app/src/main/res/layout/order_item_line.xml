@@ -21,8 +21,8 @@
             android:id="@+id/ll_content"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
             android:layout_gravity="center_vertical"
+            android:layout_weight="1"
             android:orientation="vertical">
 
             <TextView
@@ -51,9 +51,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="end|center_vertical"
+            android:layout_marginEnd="8dp"
             app:cardBackgroundColor="@color/color_background_item"
             app:cardCornerRadius="4dp"
-            android:layout_marginEnd="8dp"
             app:cardElevation="2dp"
             app:strokeColor="@color/teal_200"
             app:strokeWidth="1dp">
@@ -100,7 +100,22 @@
             android:maxLines="1"
             android:padding="8dp"
             android:paddingStart="12dp"
-            android:text="Note: thixxxxxxxxx    xxx"
+            android:text="Note: ............"
+            android:textColor="@color/white"
+            android:textSize="10sp" />
+
+        <TextView
+            android:id="@+id/tv_status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="start"
+            android:background="@drawable/background_buttom"
+            android:backgroundTint="@color/color_background_grey"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:padding="8dp"
+            android:paddingStart="4dp"
+            android:text="status"
             android:textColor="@color/white"
             android:textSize="10sp" />
 

@@ -17,6 +17,5 @@ class ChartFragment : Fragment() {
     ): View? {
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_chart, container, false)
-        Log.e("tagxx","1232")
     }
 }

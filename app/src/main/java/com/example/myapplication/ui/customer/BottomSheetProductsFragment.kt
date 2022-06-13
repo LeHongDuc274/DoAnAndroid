@@ -1,8 +1,6 @@
 package com.example.myapplication.ui.customer
 
-import android.graphics.Color
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -75,7 +73,7 @@ class BottomSheetProductsFragment : BottomSheetDialogFragment() {
         }
         product?.let {
             binding.tvPrice.text = it.price.formatWithCurrency()
-            binding.tvDisciption.text = it.disciption
+            binding.tvDisciption.text = it.content
             count = it.countOrder
             price = it.price
             binding.edtCount.setText(count.toString())
