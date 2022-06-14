@@ -3,8 +3,8 @@ package com.example.myapplication.core.api
 import com.example.myapplication.core.BASE_URL
 import com.example.myapplication.core.api.response.LoginResponse
 import com.example.myapplication.core.api.response.Result
+import com.example.myapplication.core.api.response.UsersRes
 import com.example.myapplication.core.api.response.UserResponse
-import com.example.myapplication.core.model.User
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody
@@ -33,7 +33,7 @@ interface UserApi {
     fun getListUser() : Call<Result>
 
     @GET("/users/tables")
-    fun getListTable() : Call<Result>
+    fun getListTable() : Call<UsersRes>
 
     @PATCH("/users/edit")
     fun editUser(): Call<Result>

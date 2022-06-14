@@ -8,10 +8,13 @@ import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import com.example.myapplication.R
 import com.example.myapplication.core.api.ProductApi
+import com.example.myapplication.core.api.UserApi
 import com.example.myapplication.core.api.response.ProductCreateRes
 import com.example.myapplication.core.api.response.Result
+import com.example.myapplication.core.api.response.UsersRes
 import com.example.myapplication.core.model.ImageRequestBody
 import com.example.myapplication.core.model.ProductEntity
+import com.example.myapplication.core.model.User
 import com.example.myapplication.core.utils.RealPathUtil
 import com.example.myapplication.ext.getContentType
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -28,6 +31,8 @@ class AdminViewModel(private val app: Application) : AndroidViewModel(app) {
     private var role = -1
     private var accessToken = ""
     val loading = MutableStateFlow(false)
+    val tables = MutableStateFlow<List<User>>(listOf())
+
     init {
         val sharedPref = app.getSharedPreferences(
             app.resources.getString(R.string.shared_file_name), Context.MODE_PRIVATE
@@ -46,40 +51,61 @@ class AdminViewModel(private val app: Application) : AndroidViewModel(app) {
         content: String,
         status: String,
         uri: Uri,
-        onDone : (Boolean, String , ProductEntity?) -> Unit
+        onDone: (Boolean, String, ProductEntity?) -> Unit
     ) {
         loading.value = true
         val api = ProductApi.createProductApi(accessToken)
-        val file = File(RealPathUtil.getRealPath(app,uri))
+        val file = File(RealPathUtil.getRealPath(app, uri))
         val imageRequestBody =
             app.getContentResolver().openInputStream(uri)
-                ?.let { ImageRequestBody(it,MediaType.get("image/*")) }
+                ?.let { ImageRequestBody(it, MediaType.get("image/*")) }
 
         val imageBody =
             MultipartBody.Part.createFormData("image", file.name, imageRequestBody)
         val res = api.createProduct(
-            RequestBody.create(MediaType.parse("text/plain"),name),
-            RequestBody.create(MediaType.parse("text/plain"),content),
-            RequestBody.create(MediaType.parse("text/plain"),price),
-            RequestBody.create(MediaType.parse("text/plain"),status),
-            RequestBody.create(MediaType.parse("text/plain"),category_id),
-            imageBody)
+            RequestBody.create(MediaType.parse("text/plain"), name),
+            RequestBody.create(MediaType.parse("text/plain"), content),
+            RequestBody.create(MediaType.parse("text/plain"), price),
+            RequestBody.create(MediaType.parse("text/plain"), status),
+            RequestBody.create(MediaType.parse("text/plain"), category_id),
+            imageBody
+        )
         res.enqueue(object : Callback<ProductCreateRes> {
-            override fun onResponse(call: Call<ProductCreateRes>, response: Response<ProductCreateRes>) {
+            override fun onResponse(
+                call: Call<ProductCreateRes>,
+                response: Response<ProductCreateRes>
+            ) {
                 loading.value = false
                 if (response.isSuccessful) {
-                  onDone.invoke(true,"",response.body()!!.data)
+                    onDone.invoke(true, "", response.body()!!.data)
                 } else {
-                    onDone.invoke(false,"not ok",null)
+                    onDone.invoke(false, "not ok", null)
                 }
             }
 
             override fun onFailure(call: Call<ProductCreateRes>, t: Throwable) {
                 loading.value = false
-                onDone.invoke(false,t.message.toString(),null)
+                onDone.invoke(false, t.message.toString(), null)
+            }
+        })
+    }
+
+    fun getTables() {
+        val api = UserApi.createUserApi(accessToken)
+        val res = api.getListTable()
+        res.enqueue(object : Callback<UsersRes> {
+            override fun onResponse(call: Call<UsersRes>, response: Response<UsersRes>) {
+                if (response.isSuccessful) {
+                    tables.value = response.body()!!.data
+                } else {
+
+                }
+            }
+
+            override fun onFailure(call: Call<UsersRes>, t: Throwable) {
+
             }
 
         })
-
     }
 }

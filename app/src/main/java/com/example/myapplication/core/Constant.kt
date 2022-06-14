@@ -2,7 +2,7 @@ package com.example.myapplication.core
 
 
 const val APP_NAME = ""
-const val BASE_URL = "http://192.168.1.2:3000"
+const val BASE_URL = "http://192.168.1.3:3000"
 enum class Role(val title: String, val code: Int) {
     ADMIN("admin", 1),
     TABLE("table", 2),
