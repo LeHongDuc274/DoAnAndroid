@@ -4,6 +4,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.example.myapplication.core.model.ProductEntity
 import com.example.myapplication.databinding.ProductItemBinding
 
@@ -19,11 +20,13 @@ class ProductsAdapter() : RecyclerView.Adapter<ProductsAdapter.ViewHolder>() {
             binding.tvName.text = listProduct[layoutPosition].name
             binding.tvPrice.text = listProduct[layoutPosition].price.toString() + " vnđ"
 
-            if (listProduct[layoutPosition].status == 0) {
+            if (listProduct[layoutPosition].status != 0) {
                 binding.ivStatus.visibility = View.VISIBLE
             } else {
                 binding.ivStatus.visibility = View.GONE
             }
+            val url = listProduct[layoutPosition].image_url
+            Glide.with(binding.ivProduct.context).load(url).circleCrop().into(binding.ivProduct)
         }
     }
 

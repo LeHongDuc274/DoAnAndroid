@@ -4,7 +4,8 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
-import android.view.Gravity
+import android.view.View.GONE
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.os.bundleOf
 import androidx.core.view.GravityCompat
@@ -14,6 +15,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.myapplication.LoginActivity
 import com.example.myapplication.R
 import com.example.myapplication.databinding.ActivityCustomerBinding
+import com.example.myapplication.ext.DisplayName
 import com.example.myapplication.ext.collectFlow
 import com.example.myapplication.ui.adapter.CategoryTabAdapter
 import com.example.myapplication.ui.adapter.OrderAdapter
@@ -39,7 +41,7 @@ class CustomerActivity : AppCompatActivity() {
     lateinit var consumer: Consumer
     private lateinit var binding: ActivityCustomerBinding
     private val productAdapter = ProductsAdapter()
-    private var cateAdapter = CategoryTabAdapter(this)
+    private var categoryAdapter = CategoryTabAdapter(this)
     private val orderAdapter = OrderAdapter()
     private val viewmodel: CustomerViewModel by lazy {
         ViewModelProvider(this).get(CustomerViewModel::class.java)
@@ -57,24 +59,24 @@ class CustomerActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         //initWebSocket()
-       // start()
+        // start()
     }
 
     private fun initListener() {
         collectFlow(viewmodel.listProducts) {
-            productAdapter.setListData(it)
-            it.forEach {
-                Log.e("tagPros", it.countOrder.toString())
-            }
+            viewmodel.setListProductByCategory()
         }
-        viewmodel.listOrder.observe(this) {
-            orderAdapter.setData(it)
+        collectFlow(viewmodel.listProductFilter) {
+            productAdapter.setListData(it)
+        }
+        collectFlow(viewmodel.listOrderDetails) {
+            orderAdapter.setData(it.toMutableList())
         }
         collectFlow(viewmodel.totalAmount) {
             binding.tvTotalAmount.text = it.toString() + " vnđ"
         }
         collectFlow(viewmodel.listCategories) {
-            cateAdapter.setData(it)
+            categoryAdapter.setData(it)
         }
     }
 
@@ -82,23 +84,27 @@ class CustomerActivity : AppCompatActivity() {
         productAdapter.setOnClick {
             showBottomSheetDialog(it.id)
         }
+        categoryAdapter.setOnClickItem {
+            viewmodel.setListProductByCategory(it.id)
+        }
         orderAdapter.setDeleteClick { p ->
-            val product = viewmodel.listProducts.value.find {
+            val orderDetail = viewmodel.listOrderDetails.value.find {
                 it.id == p.id
             }
-            product?.apply {
-                countOrder = 0
+            orderDetail?.apply {
+                amount = 0
                 note = "Note..."
             }
-            viewmodel.setListOrder()
+            // call API delete this order Detail
+            // viewmodel.setListOrder(list)
         }
 
         orderAdapter.setOnEditClick {
-            val sheet = BottomSheetProductsFragment()
+            val sheet = BottomSheetProductsFragment(this)
             sheet.arguments = bundleOf(
-                "id" to it.id
+                "id" to it.product_id
             )
-            sheet.show(this.supportFragmentManager, it.id.toString())
+            sheet.show(this.supportFragmentManager, it.product_id.toString())
         }
         // test LogOut
         binding.ivIconMemu.setOnClickListener {
@@ -108,11 +114,33 @@ class CustomerActivity : AppCompatActivity() {
             with(sharedPref.edit()) {
                 putInt(getString(R.string.key_role), -1)
                 putString(getString(R.string.key_access_token), "")
+                putString(getString(R.string.key_display_name),"")
                 apply()
             }
             val intent = Intent(this, LoginActivity::class.java)
             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
             startActivity(intent)
+        }
+        binding.tvBooking.setOnClickListener {
+            when {
+                viewmodel.listOrderDetails.value.isEmpty() -> { // list empty
+                    Toast.makeText(this, "Cart Empty", Toast.LENGTH_SHORT).show()
+                }
+                viewmodel.order.id == -1 && viewmodel.order.user_id == -1 -> { // order = empty -> create order
+                    viewmodel.order.order_details.apply {
+                        clear()
+                        addAll(viewmodel.listOrderDetails.value)
+                    }
+                    viewmodel.createOrder { b, mess, order ->
+                        Toast.makeText(this, mess, Toast.LENGTH_LONG).show()
+                        if (b) {
+                            binding.tvBooking.isEnabled = false
+                            binding.tvBooking.isClickable = false
+                            binding.tvBooking.visibility = GONE
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -130,15 +158,16 @@ class CustomerActivity : AppCompatActivity() {
         binding.rvCategories.apply {
             layoutManager =
                 LinearLayoutManager(this@CustomerActivity, LinearLayoutManager.HORIZONTAL, false)
-            adapter = cateAdapter
+            adapter = categoryAdapter
         }
 
         val sdf = SimpleDateFormat("dd/MM/yyyy")
         binding.tvTime.text = sdf.format(Calendar.getInstance(TimeZone.getTimeZone("GMT+7")).time)
+        binding.tvTableName.text = application.DisplayName()
     }
 
     private fun showBottomSheetDialog(id: Int) {
-        val sheet = BottomSheetProductsFragment()
+        val sheet = BottomSheetProductsFragment(this)
         sheet.arguments = bundleOf(
             "id" to id
         )
@@ -148,7 +177,7 @@ class CustomerActivity : AppCompatActivity() {
     override fun onPause() {
         super.onPause()
         finalizeSocket()
-      //  consumer.disconnect()
+        //  consumer.disconnect()
     }
 
     private fun finalizeSocket() {
@@ -246,7 +275,7 @@ class CustomerActivity : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
-        if (binding.root.isDrawerOpen(GravityCompat.END)){
+        if (binding.root.isDrawerOpen(GravityCompat.END)) {
             binding.root.closeDrawer(GravityCompat.END)
         } else {
             super.onBackPressed()

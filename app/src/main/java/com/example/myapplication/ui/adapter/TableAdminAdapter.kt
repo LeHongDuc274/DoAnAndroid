@@ -1,8 +1,8 @@
 package com.example.myapplication.ui.adapter
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
-import androidx.annotation.NonNull
 import androidx.recyclerview.widget.RecyclerView
 import com.example.myapplication.core.model.User
 import com.example.myapplication.databinding.TableItemBinding
@@ -10,13 +10,23 @@ import com.example.myapplication.databinding.TableItemBinding
 class TableAdminAdapter() : RecyclerView.Adapter<TableAdminAdapter.ViewHolder>() {
 
     private var listTable = mutableListOf<User>()
-    private var onEdit: ((User) -> Unit)? = null
     private var onItemClick: ((User) -> Unit)? = null
 
     inner class ViewHolder(val binding: TableItemBinding) : RecyclerView.ViewHolder(binding.root) {
         fun onBind() {
-            binding.tvName.text = listTable[layoutPosition].display_name
-            binding.tvStatus.text = "Status : " + listTable[layoutPosition].status
+            if (listTable[layoutPosition].id != -1) {
+                binding.tvName.visibility = View.VISIBLE
+                binding.tvStatus.visibility = View.VISIBLE
+                binding.tvEdit.visibility = View.VISIBLE
+                binding.tvAdd.visibility = View.INVISIBLE
+                binding.tvName.text = listTable[layoutPosition].display_name
+                binding.tvStatus.text = "Status : " + listTable[layoutPosition].status
+            } else {
+                binding.tvName.visibility = View.INVISIBLE
+                binding.tvStatus.visibility = View.INVISIBLE
+                binding.tvEdit.visibility = View.INVISIBLE
+                binding.tvAdd.visibility = View.VISIBLE
+            }
         }
     }
 
@@ -28,9 +38,6 @@ class TableAdminAdapter() : RecyclerView.Adapter<TableAdminAdapter.ViewHolder>()
     }
 
     private fun initListenner(holder: ViewHolder, binding: TableItemBinding) {
-        binding.tvEdit.setOnClickListener {
-            onEdit?.invoke(listTable[holder.layoutPosition])
-        }
         binding.root.setOnClickListener {
             onItemClick?.invoke(listTable[holder.layoutPosition])
         }
@@ -42,17 +49,14 @@ class TableAdminAdapter() : RecyclerView.Adapter<TableAdminAdapter.ViewHolder>()
 
     override fun getItemCount() = listTable.size
 
-    fun setData(list : List<User>){
+    fun setData(list: List<User>) {
         listTable.clear()
+        listTable.add(User(-1, -1, "", "", -1))
         listTable.addAll(list)
         notifyDataSetChanged()
     }
 
-    fun setOnEdit(callback: (User) -> Unit){
-        onEdit = callback
-    }
-
-    fun setOnItemClick(callback: (User) -> Unit){
+    fun setOnItemClick(callback: (User) -> Unit) {
         onItemClick = callback
     }
 }

@@ -1,11 +1,11 @@
 package com.example.myapplication.core.api
 
 import com.example.myapplication.core.BASE_URL
-import com.example.myapplication.core.api.response.CategoriesList
+import com.example.myapplication.core.api.response.CategoriesListResponse
+import com.example.myapplication.core.api.response.CategoryResponse
 import com.example.myapplication.core.api.response.ProductCreateRes
 import com.example.myapplication.core.api.response.Result
 import com.example.myapplication.core.api.response.products.ProductList
-import com.example.myapplication.core.model.ProductEntity
 import okhttp3.*
 import retrofit2.Call
 import retrofit2.Retrofit
@@ -26,22 +26,28 @@ interface ProductApi {
         @Part("status") status: RequestBody,
         @Part("category_id") category_id: RequestBody,
         @Part image: MultipartBody.Part
-        ) : Call<ProductCreateRes>
+    ): Call<ProductCreateRes>
 
+    @Multipart
     @PATCH("/products/edit")
-    fun editProduct():Call<Result>
+    fun updateProduct(
+        @PartMap() partMap: Map<String, @JvmSuppressWildcards RequestBody>,
+        @Part image: MultipartBody.Part? = null
+    ): Call<ProductCreateRes>
+
 
     @DELETE("/products/delete")
     fun deleteProduct(): Call<Response>
 
     @GET("/categories/index")
-    fun getListCategories(): Call<CategoriesList>
+    fun getListCategories(): Call<CategoriesListResponse>
 
+    @Multipart
     @POST("/categories/create")
-    fun createCategory() : Call<Result>
+    fun createCategory(@Part("name_type") name_type : RequestBody): Call<CategoryResponse>
 
     @PATCH("/categories/edit")
-    fun editCategory():Call<Result>
+    fun editCategory(): Call<Result>
 
     @DELETE("/categories/delete")
     fun deleteCategory(): Call<Response>

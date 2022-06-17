@@ -1,5 +1,6 @@
 package com.example.myapplication.core.model
 
+import android.os.Parcelable
 import okhttp3.MultipartBody
 
 data class ProductEntity(
@@ -10,9 +11,9 @@ data class ProductEntity(
     var status: Int = 0,
     var category_id: Int = -1,
     var image: MultipartBody.Part? = null,
-    var image_url : String = "",
+    var image_url: String = "",
     var created_at: String = "",
-    var update_at : String = ""
+    var update_at: String = ""
 ) {
     var countOrder = 0
     var note = ""

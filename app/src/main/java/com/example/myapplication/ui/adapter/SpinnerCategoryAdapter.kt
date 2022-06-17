@@ -1,16 +1,15 @@
 package com.example.myapplication.ui.adapter
 
 import android.content.Context
-import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
-import com.example.myapplication.core.model.CategoriesEntity
+import com.example.myapplication.core.model.CategoryEntity
 import com.example.myapplication.databinding.CategorySpinnerItemBinding
 
-class SpinnerCategoryAdapter(context: Context, listData: List<CategoriesEntity>) :
-    ArrayAdapter<CategoriesEntity>(context, 0, listData) {
+class SpinnerCategoryAdapter(context: Context, listData: List<CategoryEntity>) :
+    ArrayAdapter<CategoryEntity>(context, 0, listData) {
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
         return createItemView(position, parent)

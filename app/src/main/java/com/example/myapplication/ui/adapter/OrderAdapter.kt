@@ -1,30 +1,48 @@
 package com.example.myapplication.ui.adapter
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
-import androidx.annotation.NonNull
 import androidx.recyclerview.widget.RecyclerView
-import com.example.myapplication.core.model.ProductEntity
+import com.bumptech.glide.Glide
+import com.example.myapplication.core.ItemStatus
+import com.example.myapplication.core.model.OrderDetail
+import com.example.myapplication.core.utils.Utils
 import com.example.myapplication.databinding.OrderItemLineBinding
 
 class OrderAdapter : RecyclerView.Adapter<OrderAdapter.ViewHolder>() {
-    private var listOrder = mutableListOf<ProductEntity>()
-    private var onDelete: ((ProductEntity) -> Unit)? = null
-    private var onEdit: ((ProductEntity) -> Unit)? = null
+    private var listOrder = mutableListOf<OrderDetail>()
+    private var onDelete: ((OrderDetail) -> Unit)? = null
+    private var onEdit: ((OrderDetail) -> Unit)? = null
 
     inner class ViewHolder(val binding: OrderItemLineBinding) :
         RecyclerView.ViewHolder(binding.root) {
         fun onBind() {
-            val product = listOrder[layoutPosition]
-            binding.tvCount.text = product.countOrder.toString()
-            binding.tvPerPrice.text = product.price.toString()
-            binding.tvProduct.text = product.name
-            if (product.note.isBlank()) {
+            val orderDetail = listOrder[layoutPosition]
+            val product = Utils.getProduct(orderDetail.product_id)
+            product?.let {
+                binding.tvPerPrice.text = it.price.toString()
+                binding.tvProduct.text = it.name
+                binding.tvPrice.text = ((it.price) * (orderDetail.amount)).toString() + "vnđ"
+                Glide.with(binding.root.context).load(it.image_url).into(binding.ivProduct)
+                binding.ivProduct
+            }
+            binding.tvCount.text = orderDetail.amount.toString()
+            val status = Utils.getByStatus(orderDetail.status)
+            status?.let {
+                binding.tvStatus.text = it.title
+                if (it.status > ItemStatus.PENDING.status){
+                    binding.cvDelete.visibility = View.INVISIBLE
+                } else {
+                    binding.cvDelete.visibility = View.VISIBLE
+                }
+            }
+            if (orderDetail.note.isBlank()) {
                 binding.tvNote.text = "Note..."
             } else {
-                binding.tvNote.text = product.note
+                binding.tvNote.text = orderDetail.note
             }
-            binding.tvPrice.text = ((product.price) * (product.countOrder)).toString() + "vnđ"
+
         }
     }
 
@@ -51,15 +69,15 @@ class OrderAdapter : RecyclerView.Adapter<OrderAdapter.ViewHolder>() {
 
     override fun getItemCount() = listOrder.size
 
-    fun setDeleteClick(action: (ProductEntity) -> Unit) {
+    fun setDeleteClick(action: (OrderDetail) -> Unit) {
         onDelete = action
     }
 
-    fun setOnEditClick(action: (ProductEntity) -> Unit) {
+    fun setOnEditClick(action: (OrderDetail) -> Unit) {
         onEdit = action
     }
 
-    fun setData(list: MutableList<ProductEntity>) {
+    fun setData(list: MutableList<OrderDetail>) {
         listOrder = list
         notifyDataSetChanged()
     }

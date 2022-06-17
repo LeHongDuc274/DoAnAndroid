@@ -1,10 +1,8 @@
 package com.example.myapplication.core.api
 
 import com.example.myapplication.core.BASE_URL
-import com.example.myapplication.core.api.response.LoginResponse
-import com.example.myapplication.core.api.response.Result
-import com.example.myapplication.core.api.response.UsersRes
-import com.example.myapplication.core.api.response.UserResponse
+import com.example.myapplication.core.api.response.*
+import com.example.myapplication.core.api.response.user.LoginResponse
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody
@@ -19,27 +17,35 @@ interface UserApi {
     @POST("/authenticate")
     fun login(@Body requestBody: RequestBody): Call<LoginResponse>
 
+    @Multipart
     @POST("/users/create")
     fun createUser(
-        @Field("login_id") login_id: String,
-        @Field("display_name") display_name: String,
-        @Field("password") password: String,
-        @Field("password_confirmation") password_confirmation: String,
-        @Field("role") role: Int,
-        @Field("status") status: String,
-    ): Call<UserResponse>
+        @Part("login_id") login_id: RequestBody,
+        @Part("display_name") display_name: RequestBody,
+        @Part("password") password: RequestBody,
+        @Part("password_confirmation") password_confirmation: RequestBody,
+        @Part("role") role: RequestBody,
+        @Part("status") status: RequestBody,
+    ): Call<UserRes>
 
     @GET("/users/index")
-    fun getListUser() : Call<Result>
+    fun getListUser(): Call<UsersRes>
 
     @GET("/users/tables")
-    fun getListTable() : Call<UsersRes>
+    fun getListTable(): Call<UsersRes>
 
+    @Multipart
     @PATCH("/users/edit")
-    fun editUser(): Call<Result>
+    fun editUser(
+        @Part("id") id: RequestBody,
+        @Part("display_name") display_name: RequestBody,
+        @Part("role") role: RequestBody,
+        @Part("status") status: RequestBody
+        ): Call<UserRes>
+
 
     @DELETE("/users/delete")
-    fun deleteUser() : Call<Result>
+    fun deleteUser(): Call<Result>
 
 
     companion object {

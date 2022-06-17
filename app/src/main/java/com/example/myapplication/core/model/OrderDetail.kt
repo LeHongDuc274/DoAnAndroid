@@ -1,11 +1,23 @@
 package com.example.myapplication.core.model
 
 data class OrderDetail(
-    val id: Int,
-    val userId: Int,
-    val orderId: Int,
-    val productId: Int,
-    var amount: Int,
+    var id: Int = -1,
+    var user_id: Int = -1,
+    var order_id: Int = -1,
+    var product_id: Int = -1,
+    var amount: Int = 0,
     var note: String = "",
-    var status: Int
-)
+    var status: Int = -1
+) {
+    fun copyInstance(): OrderDetail {
+        return OrderDetail(
+            id = this.id,
+            user_id = this.user_id,
+            product_id = this.product_id,
+            order_id = this.order_id,
+            amount = this.amount,
+            note = this.note,
+            status = this.status
+        )
+    }
+}

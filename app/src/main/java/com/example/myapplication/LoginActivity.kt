@@ -10,6 +10,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.example.myapplication.databinding.ActivityLoginBinding
 import com.example.myapplication.ui.admin.AdminActivity
 import com.example.myapplication.ui.customer.CustomerActivity
+import com.example.myapplication.ui.kitchen.KitchenActivity
 import com.example.myapplication.viewmodel.LoginViewModel
 
 class LoginActivity : AppCompatActivity() {
@@ -37,8 +38,6 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun requestLogin(login_id: String, password: String) {
-        Log.e("tagcheck","sadas")
-
         val sharedPref = getSharedPreferences(
             getString(R.string.shared_file_name), Context.MODE_PRIVATE
         ) ?: return
@@ -49,6 +48,7 @@ class LoginActivity : AppCompatActivity() {
                 with(sharedPref.edit()) {
                     putInt(getString(R.string.key_role), it.role)
                     putString(getString(R.string.key_access_token), it.access_token)
+                    putString(getString(R.string.key_display_name),it.display_name)
                     apply()
                 }
                 Log.e("tagRes",it.toString())
@@ -65,7 +65,10 @@ class LoginActivity : AppCompatActivity() {
                     }
 
                     2 -> { // kitchen
-
+                        val intent = Intent(this, KitchenActivity::class.java)
+                        intent.flags =
+                            Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                        startActivity(intent)
                     }
 
                     3 -> { // table

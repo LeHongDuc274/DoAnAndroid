@@ -7,16 +7,12 @@
     android:background="@color/color_background_grey"
     tools:context=".ui.admin.SettingFragment">
 
-    <TextView
+    <include
+        layout="@layout/tool_bar"
         android:id="@+id/tool_bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="8dp"
-        android:gravity="center"
-        android:text="Settings"
         android:textColor="@color/white"
-        android:textSize="16sp"
-        android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -32,13 +28,49 @@
         app:layout_constraintTop_toBottomOf="@+id/tool_bar">
 
         <TextView
-            android:id="@+id/tv_manager_user"
+            android:id="@+id/tv_table"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
+            android:layout_weight="1"
             android:background="@drawable/backgound_product_manager"
             android:padding="4dp"
-            android:text="Manage User"
+            android:tag="3"
+            android:text="Table"
+            android:textAlignment="center"
+            android:textColor="@color/white"
+            android:textSize="12sp"
+            app:layout_constraintBottom_toBottomOf="@+id/rv_categories"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/rv_categories" />
+
+        <TextView
+            android:id="@+id/tv_staff"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:layout_weight="1"
+            android:background="@drawable/backgound_product_manager"
+            android:padding="4dp"
+            android:tag="1"
+            android:text="Staff"
+            android:textAlignment="center"
+            android:textColor="@color/white"
+            android:textSize="12sp"
+            app:layout_constraintBottom_toBottomOf="@+id/rv_categories"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/rv_categories" />
+
+        <TextView
+            android:id="@+id/tv_kitchen"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:layout_weight="1"
+            android:background="@drawable/backgound_product_manager"
+            android:padding="4dp"
+            android:tag="2"
+            android:text="Kitchen"
             android:textAlignment="center"
             android:textColor="@color/white"
             android:textSize="12sp"
@@ -49,7 +81,7 @@
     </LinearLayout>
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rv_all_table"
+        android:id="@+id/rv_user"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginTop="12dp"
@@ -72,6 +104,6 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/rv_all_table" />
+        app:layout_constraintTop_toBottomOf="@id/rv_user" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

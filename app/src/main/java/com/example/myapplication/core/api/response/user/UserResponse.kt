@@ -1,4 +1,4 @@
-package com.example.myapplication.core.api.response
+package com.example.myapplication.core.api.response.user
 
 data class UserResponse(
     val id: Int,

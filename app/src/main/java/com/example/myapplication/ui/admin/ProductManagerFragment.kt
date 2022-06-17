@@ -6,10 +6,13 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.os.bundleOf
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.myapplication.core.PRODUCT_EXTRA_KEY
 import com.example.myapplication.core.model.ProductEntity
+import com.example.myapplication.core.utils.GsonUtils
 import com.example.myapplication.databinding.FragmentProductManagerBinding
 import com.example.myapplication.ext.collectFlow
 import com.example.myapplication.ui.adapter.CategoryTabAdapter
@@ -46,7 +49,7 @@ class ProductManagerFragment : Fragment() {
         collectFlow(cmViewModel.listCategories) {
             cateAdapter.setData(it)
         }
-        collectFlow(cmViewModel.listProductFilter){
+        collectFlow(cmViewModel.listProductFilter) {
             prAdapter.setData(it)
         }
         cateAdapter.setOnClickItem {
@@ -54,7 +57,7 @@ class ProductManagerFragment : Fragment() {
         }
 
         prAdapter.onClick {
-            if (it.id == -1){
+            if (it.id == -1) {
                 addNewProduct()
             } else {
                 editProduct(it)
@@ -79,13 +82,19 @@ class ProductManagerFragment : Fragment() {
         }
     }
 
-    private fun addNewProduct(){
+    private fun addNewProduct() {
         val fm = childFragmentManager
         ProductFormFragment().show(fm, null)
     }
 
-    private fun editProduct(product: ProductEntity){
-
+    private fun editProduct(product: ProductEntity) {
+        val fm = childFragmentManager
+        val producFormFragment = ProductFormFragment()
+        val productGson = GsonUtils.getGsonParser().toJson(product)
+        producFormFragment.arguments = bundleOf(
+            PRODUCT_EXTRA_KEY to productGson
+        )
+        producFormFragment.show(fm, null)
     }
 
     override fun onDestroy() {

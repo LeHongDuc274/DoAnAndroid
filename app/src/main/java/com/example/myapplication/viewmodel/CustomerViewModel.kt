@@ -5,13 +5,20 @@ import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import com.example.myapplication.core.api.OrderApi
 import com.example.myapplication.core.api.ProductApi
-import com.example.myapplication.core.api.response.CategoriesList
+import com.example.myapplication.core.api.response.CategoriesListResponse
+import com.example.myapplication.core.api.response.OrderDetailRes
+import com.example.myapplication.core.api.response.OrderResponse
 import com.example.myapplication.core.api.response.products.ProductList
-import com.example.myapplication.core.model.CategoriesEntity
+import com.example.myapplication.core.model.CategoryEntity
+import com.example.myapplication.core.model.Order
+import com.example.myapplication.core.model.OrderDetail
 import com.example.myapplication.core.model.ProductEntity
+import com.example.myapplication.core.utils.Utils
 import com.example.myapplication.ext.AccessToken
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import retrofit2.Call
 import retrofit2.Callback
@@ -19,22 +26,27 @@ import retrofit2.Response
 
 class CustomerViewModel(private val app: Application) : AndroidViewModel(app) {
     private var token = ""
-    val listCategories = MutableStateFlow<MutableList<CategoriesEntity>>(mutableListOf())
+    val listCategories = MutableStateFlow<MutableList<CategoryEntity>>(mutableListOf())
     val listProducts = MutableStateFlow<MutableList<ProductEntity>>(mutableListOf())
-    val listOrder = MutableLiveData<MutableList<ProductEntity>>().apply { value = mutableListOf() }
+    val listOrderDetails = MutableStateFlow<List<OrderDetail>>(listOf())
     val totalAmount = MutableStateFlow<Int>(0)
     val listProductFilter =
         MutableStateFlow<MutableList<ProductEntity>>(mutableListOf())
     var categorySelected = -1
+    var order: Order = Order()
 
     init {
         token = app.AccessToken()
         val productApi = ProductApi.createProductApi(token)
-
-        productApi.getListCategories().enqueue(object : Callback<CategoriesList> {
+        viewModelScope.launch {
+            listProducts.collect {
+                Utils.setListProduct(it)
+            }
+        }
+        productApi.getListCategories().enqueue(object : Callback<CategoriesListResponse> {
             override fun onResponse(
-                call: Call<CategoriesList>,
-                response: Response<CategoriesList>
+                call: Call<CategoriesListResponse>,
+                response: Response<CategoriesListResponse>
             ) {
                 if (response.isSuccessful) {
                     val listdata = response.body()!!.data.toMutableList()
@@ -46,8 +58,8 @@ class CustomerViewModel(private val app: Application) : AndroidViewModel(app) {
                 }
             }
 
-            override fun onFailure(call: Call<CategoriesList>, t: Throwable) {
-                TODO("Not yet implemented")
+            override fun onFailure(call: Call<CategoriesListResponse>, t: Throwable) {
+                Log.e("tag", t.message.toString())
             }
 
         })
@@ -56,8 +68,6 @@ class CustomerViewModel(private val app: Application) : AndroidViewModel(app) {
             override fun onResponse(call: Call<ProductList>, response: Response<ProductList>) {
                 if (response.isSuccessful) {
                     val listdata = response.body()!!.data.toMutableList()
-                    Log.e("tagPrice",listdata.toString())
-
                     viewModelScope.launch {
                         listProducts.emit(listdata)
                         setListProductByCategory(categorySelected)
@@ -66,19 +76,18 @@ class CustomerViewModel(private val app: Application) : AndroidViewModel(app) {
                     Log.e("tag", response.code().toString())
                 }
             }
+
             override fun onFailure(call: Call<ProductList>, t: Throwable) {
                 Log.e("tag", t.message.toString())
             }
         })
     }
 
-    fun setListOrder() {
-        listOrder.value = listProducts.value.filter {
-            it.countOrder > 0
-        }.toMutableList()
-        totalAmount.value = listOrder.value?.toList()?.sumOf {
-            sum(it)
-        } ?: 0
+
+    fun setListOrder(list: MutableList<OrderDetail>) {
+        viewModelScope.launch {
+            listOrderDetails.emit(list)
+        }
     }
 
     fun setListProductByCategory(id: Int = categorySelected) {
@@ -97,8 +106,70 @@ class CustomerViewModel(private val app: Application) : AndroidViewModel(app) {
         }
     }
 
+    fun createOrder(onDone: (Boolean, String, Order?) -> Unit) {
+        val api = OrderApi.createOrderApi(token)
+        val res = api.createOrder(order)
+        res.enqueue(object : Callback<OrderResponse> {
+            override fun onResponse(call: Call<OrderResponse>, response: Response<OrderResponse>) {
+                if (response.isSuccessful) {
+                    val data = response.body()!!.data
+                    order = data
+                    listOrderDetails.value = data.order_details
+                    onDone.invoke(true, "Succes", data)
+                } else {
+                    onDone.invoke(false, response.code().toString(), null)
+                }
+            }
+
+            override fun onFailure(call: Call<OrderResponse>, t: Throwable) {
+                onDone.invoke(false, t.message.toString(), null)
+            }
+
+        })
+    }
+
+    fun createOrderDetail(detail: OrderDetail, onDone: (Boolean, String, OrderDetail?) -> Unit) {
+        val api = OrderApi.createOrderApi(token)
+        val res = api.createOrderDetails(detail)
+        res.enqueue(object : Callback<OrderDetailRes> {
+            override fun onResponse(call: Call<OrderDetailRes>, response: Response<OrderDetailRes>) {
+                if (response.isSuccessful) {
+                    onDone.invoke(true, "Create detail succes", response.body()!!.data)
+                } else {
+                    onDone.invoke(false, response.code().toString(), null)
+                }
+            }
+
+            override fun onFailure(call: Call<OrderDetailRes>, t: Throwable) {
+                onDone.invoke(false, t.message.toString(), null)
+            }
+        })
+
+
+    }
+
+    fun updateOrderDetails(detail: OrderDetail, onDone: (Boolean, String, OrderDetail?) -> Unit) {
+        val api = OrderApi.createOrderApi(token)
+        val res = api.updateOrderDetails(detail)
+        res.enqueue(object : Callback<OrderDetailRes> {
+            override fun onResponse(call: Call<OrderDetailRes>, response: Response<OrderDetailRes>) {
+                if (response.isSuccessful) {
+                    onDone.invoke(true, "Update Order detail succes", response.body()!!.data)
+                } else {
+                    onDone.invoke(false, response.code().toString(), null)
+                }
+            }
+
+            override fun onFailure(call: Call<OrderDetailRes>, t: Throwable) {
+                onDone.invoke(false, t.message.toString(), null)
+            }
+        })
+
+    }
+
     private fun sum(pr: ProductEntity): Int {
         return ((pr.countOrder) * (pr.price))
     }
+
 }
 

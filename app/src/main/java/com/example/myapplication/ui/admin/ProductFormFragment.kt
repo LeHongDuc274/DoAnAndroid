@@ -10,6 +10,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -18,9 +19,12 @@ import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
+import com.bumptech.glide.Glide
 import com.example.myapplication.R
-import com.example.myapplication.core.model.CategoriesEntity
+import com.example.myapplication.core.PRODUCT_EXTRA_KEY
+import com.example.myapplication.core.model.CategoryEntity
 import com.example.myapplication.core.model.ProductEntity
+import com.example.myapplication.core.utils.GsonUtils
 import com.example.myapplication.databinding.FragmentProductFormBinding
 import com.example.myapplication.ext.collectFlow
 import com.example.myapplication.ui.adapter.SpinnerCategoryAdapter
@@ -37,6 +41,7 @@ class ProductFormFragment : BaseDialogFragment(R.layout.fragment_product_form) {
     private val binding get() = _binding!!
     private var mode = NEW_MODE
     private var uri: Uri? = null
+    private var product: ProductEntity? = null
     private val adminVM: AdminViewModel by lazy {
         ViewModelProvider(requireActivity())[AdminViewModel::class.java]
     }
@@ -64,6 +69,10 @@ class ProductFormFragment : BaseDialogFragment(R.layout.fragment_product_form) {
             mode = NEW_MODE
         } else {
             mode = EDIT_MODE
+            val productGson = requireArguments().getString(PRODUCT_EXTRA_KEY)
+            product = GsonUtils.getGsonParser().fromJson(productGson, ProductEntity::class.java)
+            initViewEditMode()
+            Log.e("tagDataOld", "${product!!.id}  ${product!!.name}")
         }
         binding.ivProduct.setOnClickListener {
             requestPermissionAndPickImage()
@@ -85,38 +94,90 @@ class ProductFormFragment : BaseDialogFragment(R.layout.fragment_product_form) {
         }
     }
 
+    private fun initViewEditMode() {
+        product?.let {
+            binding.edtName.setText(it.name)
+            binding.edtPrice.setText(it.price.toString())
+            binding.edtContent.setText(it.content)
+            binding.swStatus.isChecked = it.status.toString() == "0"
+            binding.tvEdit.text = "Edit"
+            val url = it.image_url
+            Glide.with(binding.ivProduct.context).load(url).circleCrop().into(binding.ivProduct)
+        }
+    }
+
     private fun createProduct() {
-        val category = binding.snCategory.selectedItem as CategoriesEntity
+        val category = binding.snCategory.selectedItem as CategoryEntity
         val category_id = category.id.toString()
         val name = binding.edtName.text.toString()
         val price = binding.edtPrice.text.toString()
         val content = binding.edtContent.text.toString()
         val status = if (binding.swStatus.isChecked) "0" else "1"
+        if (mode == NEW_MODE) {
+            if (category_id.isBlank() || name.isBlank() || price.isBlank() || content.isBlank() || status.isBlank() || uri == null) {
+                Toast.makeText(requireActivity(), "Value cann't blank", Toast.LENGTH_LONG).show()
+            } else {
+                adminVM.createProduct(
+                    category_id,
+                    name,
+                    price,
+                    content,
+                    status,
+                    uri!!
+                ) { b, str, pr ->
+                    if (b) {
+                        Toast.makeText(requireActivity(), "Add succes", Toast.LENGTH_LONG).show()
+                        dismiss()
+                        GlobalScope.launch {
 
-        if (category_id.isBlank() || name.isBlank() || price.isBlank() || content.isBlank() || status.isBlank() || uri == null) {
-            Toast.makeText(requireActivity(), "Value cann't blank", Toast.LENGTH_LONG).show()
-        } else {
-            adminVM.createProduct(category_id, name, price, content, status, uri!!) { b, str, pr ->
-                if (b) {
-                    Toast.makeText(requireActivity(), "Add succes", Toast.LENGTH_LONG).show()
-                    dismiss()
-                    GlobalScope.launch {
+                            var list = mutableListOf<ProductEntity>()
+                            list.addAll(customerViewModel.listProducts.value)
+                            list.add(0, pr!!)
+                            customerViewModel.listProducts.emit(list)
+                            customerViewModel.setListProductByCategory(customerViewModel.categorySelected)
+                        }
 
-                        var list = mutableListOf<ProductEntity>()
-                        list.addAll(customerViewModel.listProducts.value)
-                        list.add(0, pr!!)
-                        customerViewModel.listProducts.emit(list)
-                        customerViewModel.setListProductByCategory(customerViewModel.categorySelected)
+                    } else {
+                        Toast.makeText(requireActivity(), str, Toast.LENGTH_LONG).show()
                     }
-
-                } else {
-                    Toast.makeText(requireActivity(), str, Toast.LENGTH_LONG).show()
+                }
+            }
+        } else {
+            if (category_id.isBlank() || name.isBlank() || price.isBlank() || content.isBlank() || status.isBlank()) {
+                Toast.makeText(requireActivity(), "Value cann't blank", Toast.LENGTH_LONG).show()
+            } else {
+                adminVM.editProduct(
+                    product!!.id.toString(),
+                    category_id,
+                    name,
+                    price,
+                    content,
+                    status,
+                    uri
+                ) { b, str, pr ->
+                    if (b) {
+                        Toast.makeText(requireActivity(), "UpdateSucces", Toast.LENGTH_LONG).show()
+                        dismiss()
+                        GlobalScope.launch {
+                            var list = mutableListOf<ProductEntity>()
+                            list.addAll(customerViewModel.listProducts.value)
+                            val index =
+                                customerViewModel.listProducts.value.indexOfFirst { it.id == pr!!.id }
+                            list.set(index, pr!!)
+                            customerViewModel.listProducts.emit(list)
+                            customerViewModel.setListProductByCategory(customerViewModel.categorySelected)
+                        }
+                    } else {
+                        Toast.makeText(requireActivity(), str, Toast.LENGTH_LONG).show()
+                    }
                 }
             }
         }
+
+
     }
 
-    private fun setDataSpinner(mutableList: MutableList<CategoriesEntity>) {
+    private fun setDataSpinner(mutableList: MutableList<CategoryEntity>) {
         val spinnerAdapter = SpinnerCategoryAdapter(requireActivity(), mutableList)
         spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         binding.snCategory.apply {
@@ -124,6 +185,12 @@ class ProductFormFragment : BaseDialogFragment(R.layout.fragment_product_form) {
             post {
                 dropDownWidth = measuredWidth
             }
+        }
+        if (mode == EDIT_MODE) {
+            val pos = mutableList.indexOfFirst {
+                it.id == product!!.category_id
+            }
+            binding.snCategory.setSelection(pos)
         }
     }
 

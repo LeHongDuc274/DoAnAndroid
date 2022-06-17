@@ -7,14 +7,14 @@ import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.example.myapplication.R
-import com.example.myapplication.core.model.CategoriesEntity
+import com.example.myapplication.core.model.CategoryEntity
 import com.example.myapplication.databinding.CategoryTabItemBinding
 
 class CategoryTabAdapter(private val context: Context) :
     RecyclerView.Adapter<CategoryTabAdapter.ViewHolder>() {
-    private var listCategories = mutableListOf<CategoriesEntity>()
+    private var listCategories = mutableListOf<CategoryEntity>()
     private var selectedPos = 0
-    private var onClick: ((CategoriesEntity) -> Unit)? = null
+    private var onClick: ((CategoryEntity) -> Unit)? = null
 
     inner class ViewHolder(val binding: CategoryTabItemBinding) :
         RecyclerView.ViewHolder(binding.root) {
@@ -48,14 +48,14 @@ class CategoryTabAdapter(private val context: Context) :
 
     override fun getItemCount() = listCategories.size
 
-    fun setData(list: MutableList<CategoriesEntity>) {
+    fun setData(list: MutableList<CategoryEntity>) {
         listCategories.clear()
         listCategories.addAll(list)
-        listCategories.add(0, CategoriesEntity(-1, "All"))
+        listCategories.add(0, CategoryEntity(-1, "All"))
         notifyDataSetChanged()
     }
 
-    fun setOnClickItem(action: (CategoriesEntity) -> Unit) {
+    fun setOnClickItem(action: (CategoryEntity) -> Unit) {
         onClick = action
     }
 }

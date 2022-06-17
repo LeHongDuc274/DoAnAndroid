@@ -2,8 +2,8 @@ package com.example.myapplication.viewmodel
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
-import com.example.myapplication.core.api.response.LoginResponse
-import com.example.myapplication.core.api.response.UserResponse
+import com.example.myapplication.core.api.response.user.LoginResponse
+import com.example.myapplication.core.api.response.user.UserResponse
 import com.example.myapplication.core.repo.MainRepository
 import okhttp3.MediaType
 import okhttp3.RequestBody

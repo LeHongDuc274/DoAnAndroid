@@ -11,6 +11,8 @@ import androidx.lifecycle.lifecycleScope
 import com.example.myapplication.R
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
+import okhttp3.MediaType
+import okhttp3.RequestBody
 
 
 fun <T> AppCompatActivity.collectFlow(targetFlow: Flow<T>, collectBlock: ((T) -> Unit)) {
@@ -32,27 +34,21 @@ fun <T> Fragment.collectFlow(targetFlow: Flow<T>, collectBlock: ((T) -> Unit)) {
 fun Context.getDrawableByName(name: String): Int =
     resources.getIdentifier(name, "drawable", packageName)
 
-@SuppressLint("Range")
-fun Application.getContentType(uri: Uri): String? {
-    var type: String? = null
-    var cursor = getContentResolver().query(uri, null, null, null, null);
-    try {
-        if (cursor != null) {
-            cursor.moveToFirst()
-            type = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.MIME_TYPE));
-            cursor.close()
-        }
-    } catch (e: Exception) {
-        e.printStackTrace();
-    }
-    return type
-}
-
 fun Application.AccessToken(): String {
     val sharedPref = getSharedPreferences(
         resources.getString(R.string.shared_file_name), Context.MODE_PRIVATE
     )
-    val role = sharedPref.getInt(resources.getString(R.string.key_role), -1)
     return sharedPref.getString(resources.getString(R.string.key_access_token), "").toString()
+}
+
+fun Application.DisplayName(): String{
+    val sharedPref = getSharedPreferences(
+        resources.getString(R.string.shared_file_name), Context.MODE_PRIVATE
+    )
+    return sharedPref.getString(resources.getString(R.string.key_display_name),"").toString()
+}
+
+fun createRequestBody(str : String) : RequestBody{
+   return RequestBody.create(MediaType.parse("text/plain"), str)
 }
 
