@@ -1,7 +1,6 @@
 package com.example.myapplication.ui.admin
 
 import android.os.Bundle
-import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -17,7 +16,7 @@ import com.example.myapplication.databinding.FragmentProductManagerBinding
 import com.example.myapplication.ext.collectFlow
 import com.example.myapplication.ui.adapter.CategoryTabAdapter
 import com.example.myapplication.ui.adapter.ProductManagerAdapter
-import com.example.myapplication.viewmodel.CustomerViewModel
+import com.example.myapplication.viewmodel.AdminViewModel
 
 
 class ProductManagerFragment : Fragment() {
@@ -25,13 +24,13 @@ class ProductManagerFragment : Fragment() {
     private val binding get() = _binding!!
     private val prAdapter = ProductManagerAdapter()
     private lateinit var cateAdapter: CategoryTabAdapter
-    private lateinit var cmViewModel: CustomerViewModel
+    private lateinit var viewModel: AdminViewModel
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         _binding = FragmentProductManagerBinding.inflate(inflater, container, false)
-        cmViewModel = ViewModelProvider(requireActivity())[CustomerViewModel::class.java]
+        viewModel = ViewModelProvider(requireActivity())[AdminViewModel::class.java]
         cateAdapter = CategoryTabAdapter(requireContext())
         return binding.root
     }
@@ -43,17 +42,17 @@ class ProductManagerFragment : Fragment() {
     }
 
     private fun initListener() {
-        collectFlow(cmViewModel.listProducts) {
-            cmViewModel.setListProductByCategory()
+        collectFlow(viewModel.listProducts) {
+            viewModel.setListProductByCategory()
         }
-        collectFlow(cmViewModel.listCategories) {
+        collectFlow(viewModel.listCategories) {
             cateAdapter.setData(it)
         }
-        collectFlow(cmViewModel.listProductFilter) {
+        collectFlow(viewModel.listProductFilter) {
             prAdapter.setData(it)
         }
         cateAdapter.setOnClickItem {
-            cmViewModel.setListProductByCategory(it.id)
+            viewModel.setListProductByCategory(it.id)
         }
 
         prAdapter.onClick {

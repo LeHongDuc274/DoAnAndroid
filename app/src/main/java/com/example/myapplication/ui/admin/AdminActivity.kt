@@ -1,17 +1,21 @@
 package com.example.myapplication.ui.admin
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.myapplication.BaseActivity
 import com.example.myapplication.core.TabItem
 import com.example.myapplication.databinding.ActivityAdminBinding
 import com.example.myapplication.ui.adapter.TabItemAdapter
 import com.example.myapplication.ui.adapter.TabPagerAdapter
+import com.example.myapplication.viewmodel.AdminViewModel
 
-class AdminActivity : AppCompatActivity() {
+class AdminActivity : BaseActivity() {
     lateinit var binding: ActivityAdminBinding
     private val tabAdapter = TabItemAdapter(this)
+    private val adminVM : AdminViewModel by lazy {
+        ViewModelProvider(this)[AdminViewModel::class.java]
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityAdminBinding.inflate(layoutInflater)
@@ -22,6 +26,7 @@ class AdminActivity : AppCompatActivity() {
     private fun initViews() {
         initTabs()
         initPager()
+        adminVM.initViewModel()
     }
 
     private fun initPager() {
@@ -39,8 +44,10 @@ class AdminActivity : AppCompatActivity() {
             adapter = tabAdapter
         }
         tabAdapter.setData(listTab)
+        tabAdapter.setSelectedItem(adminVM.pageSelected)
         tabAdapter.setOnClick {
             binding.vpPages.currentItem = it
+            adminVM.pageSelected = it
         }
     }
 }

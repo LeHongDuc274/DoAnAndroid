@@ -3,7 +3,6 @@ package com.example.myapplication.ui.customer
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.View.GONE
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -12,6 +11,7 @@ import androidx.core.view.GravityCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.myapplication.BaseActivity
 import com.example.myapplication.LoginActivity
 import com.example.myapplication.R
 import com.example.myapplication.databinding.ActivityCustomerBinding
@@ -21,24 +21,11 @@ import com.example.myapplication.ui.adapter.CategoryTabAdapter
 import com.example.myapplication.ui.adapter.OrderAdapter
 import com.example.myapplication.ui.adapter.ProductsAdapter
 import com.example.myapplication.viewmodel.CustomerViewModel
-import com.google.gson.JsonArray
-import com.google.gson.JsonObject
-import com.vinted.actioncable.client.kotlin.ActionCable
-import com.vinted.actioncable.client.kotlin.Channel
-import com.vinted.actioncable.client.kotlin.Consumer
-import okhttp3.*
-import okio.ByteString
-import java.math.BigInteger
-import java.net.URI
 import java.text.SimpleDateFormat
 import java.util.*
 
 
-class CustomerActivity : AppCompatActivity() {
-
-    lateinit var client: OkHttpClient
-    lateinit var ws: WebSocket
-    lateinit var consumer: Consumer
+class CustomerActivity : BaseActivity() {
     private lateinit var binding: ActivityCustomerBinding
     private val productAdapter = ProductsAdapter()
     private var categoryAdapter = CategoryTabAdapter(this)
@@ -56,15 +43,15 @@ class CustomerActivity : AppCompatActivity() {
         initOnClick()
     }
 
-    override fun onResume() {
-        super.onResume()
-        //initWebSocket()
-        // start()
-    }
-
     private fun initListener() {
+        viewmodel.initViewModel()
         collectFlow(viewmodel.listProducts) {
             viewmodel.setListProductByCategory()
+            if (it.isNotEmpty()) {
+                viewmodel.initSocket {
+                    binding.tvBooking.visibility = GONE
+                }
+            }
         }
         collectFlow(viewmodel.listProductFilter) {
             productAdapter.setListData(it)
@@ -114,7 +101,8 @@ class CustomerActivity : AppCompatActivity() {
             with(sharedPref.edit()) {
                 putInt(getString(R.string.key_role), -1)
                 putString(getString(R.string.key_access_token), "")
-                putString(getString(R.string.key_display_name),"")
+                putString(getString(R.string.key_display_name), "")
+                putInt(getString(R.string.key_id), -1)
                 apply()
             }
             val intent = Intent(this, LoginActivity::class.java)
@@ -174,111 +162,16 @@ class CustomerActivity : AppCompatActivity() {
         sheet.show(supportFragmentManager, id.toString())
     }
 
-    override fun onPause() {
-        super.onPause()
-        finalizeSocket()
-        //  consumer.disconnect()
-    }
-
-    private fun finalizeSocket() {
-
-    }
-
-    private fun initWebSocket() {
-        client = OkHttpClient()
-
-        try {
-            // val request = Request.Builder().url("ws://192.168.1.5:3000/api/v1/cable").build()
-            val uri = URI("ws://192.168.1.5:3000/cable")
-            consumer = ActionCable.createConsumer(uri)
-//            val listenner = SocketListener()
-//            ws = client.newWebSocket(request,listenner)
-//            client.dispatcher().executorService().shutdown()
-            val chatChannel = Channel("ChatsChannel")
-            val subscription = consumer.subscriptions.create(chatChannel)
-            Log.e("tagcc", "ccc")
-            subscription.onConnected = {
-                // Called when the subscription has been successfully completed
-                Log.e("tagggg", "start")
-            }
-
-            subscription.onRejected = {
-                // Called when the subscription is rejected by the server
-                Log.e("tagSocket", "onRejected")
-            }
-
-            subscription.onReceived = { data: Any? ->
-                Log.e("tagSocket", "onReceived")
-                // Called when the subscription receives data from the server
-                // Possible types...
-                when (data) {
-                    is Int -> {
-                    }
-                    is Long -> {
-                    }
-                    is BigInteger -> {
-                    }
-                    is String -> {
-                    }
-                    is Double -> {
-                    }
-                    is Boolean -> {
-                    }
-                    is JsonObject -> {
-                    }
-                    is JsonArray -> {
-                    }
-                }
-            }
-
-            subscription.onDisconnected = {
-                // Called when the subscription has been closed
-            }
-
-            subscription.onFailed = { error ->
-                // Called when the subscription encounters any error
-                Log.e("tagSocket", "failed")
-            }
-            consumer.connect()
-
-        } catch (e: Exception) {
-            Log.e("tagggg", "e")
-        }
-    }
-
-
-    private fun start() {
-        client = OkHttpClient()
-        val request: Request = Request.Builder().url("wss://192.168.1.5:3000/cable").build()
-        val listener = EchoWebSocketListener()
-        val ws = client.newWebSocket(request, listener)
-        client.dispatcher().executorService().shutdown()
-        client = OkHttpClient()
-
-    }
-
-    inner class EchoWebSocketListener : WebSocketListener() {
-        override fun onOpen(webSocket: WebSocket, response: Response) {
-            webSocket.send("{\"command\":\"subscribe\", \"identifier\":\"{\\\"channel\\\":\\\"ChatsChannel\\\"}\"}")
-            Log.e("tagxx", "onOpen")
-        }
-
-        override fun onMessage(webSocket: WebSocket, bytes: ByteString) {
-            Log.e("tagxx", "onMessage")
-        }
-
-
-        override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
-            Log.e("tagxx", "onFail")
-
-        }
-    }
-
     override fun onBackPressed() {
         if (binding.root.isDrawerOpen(GravityCompat.END)) {
             binding.root.closeDrawer(GravityCompat.END)
         } else {
             super.onBackPressed()
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        viewmodel.finalizeSocket()
     }
 }

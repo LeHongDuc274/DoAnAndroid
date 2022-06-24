@@ -34,7 +34,7 @@ data class CategoryResponse(
 
 data class OrderResponse(
     val status : Boolean,
-    val `data` : Order
+    val `data` : Order?,
 )
 
 data class OrderDetailRes(
@@ -45,4 +45,14 @@ data class OrderDetailRes(
 data class OrderDetailsListRes(
     val status: Boolean,
     val `data` : List<OrderDetail>
+)
+data class TableOrderingList(
+    val status: Boolean,
+    var `data`: MutableList<TableOrdering>
+)
+
+data class TableOrdering(
+    val display_name: String,
+    val user_id: Int,
+    val order : Order?
 )

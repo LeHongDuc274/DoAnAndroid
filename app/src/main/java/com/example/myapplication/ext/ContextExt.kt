@@ -41,14 +41,21 @@ fun Application.AccessToken(): String {
     return sharedPref.getString(resources.getString(R.string.key_access_token), "").toString()
 }
 
-fun Application.DisplayName(): String{
+fun Application.DisplayName(): String {
     val sharedPref = getSharedPreferences(
         resources.getString(R.string.shared_file_name), Context.MODE_PRIVATE
     )
-    return sharedPref.getString(resources.getString(R.string.key_display_name),"").toString()
+    return sharedPref.getString(resources.getString(R.string.key_display_name), "").toString()
 }
 
-fun createRequestBody(str : String) : RequestBody{
-   return RequestBody.create(MediaType.parse("text/plain"), str)
+fun Application.UserId(): Int {
+    val sharedPref = getSharedPreferences(
+        resources.getString(R.string.shared_file_name), Context.MODE_PRIVATE
+    )
+    return sharedPref.getInt(resources.getString(R.string.key_id), -1)
+}
+
+fun createRequestBody(str: String): RequestBody {
+    return RequestBody.create(MediaType.parse("text/plain"), str)
 }
 

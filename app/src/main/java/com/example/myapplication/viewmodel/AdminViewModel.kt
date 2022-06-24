@@ -4,51 +4,131 @@ import android.app.Application
 import android.content.Context
 import android.net.Uri
 import android.util.Log
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.myapplication.R
-import com.example.myapplication.core.Role
-import com.example.myapplication.core.api.ProductApi
-import com.example.myapplication.core.api.UserApi
-import com.example.myapplication.core.api.response.CategoryResponse
-import com.example.myapplication.core.api.response.ProductCreateRes
-import com.example.myapplication.core.api.response.UserRes
-import com.example.myapplication.core.api.response.UsersRes
-import com.example.myapplication.core.model.CategoryEntity
-import com.example.myapplication.core.model.ImageRequestBody
-import com.example.myapplication.core.model.ProductEntity
-import com.example.myapplication.core.model.User
+import com.example.myapplication.core.*
+import com.example.myapplication.core.api.OrderService
+import com.example.myapplication.core.api.ProductService
+import com.example.myapplication.core.api.UserService
+import com.example.myapplication.core.api.response.*
+import com.example.myapplication.core.model.*
+import com.example.myapplication.core.utils.GsonUtils
 import com.example.myapplication.core.utils.RealPathUtil
+import com.example.myapplication.ext.UserId
 import com.example.myapplication.ext.createRequestBody
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
-import okhttp3.MediaType
-import okhttp3.MultipartBody
-import okhttp3.RequestBody
+import okhttp3.*
+import org.json.JSONObject
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import java.io.File
 
 
-class AdminViewModel(private val app: Application) : AndroidViewModel(app) {
+class AdminViewModel(private val app: Application) : BaseViewModel(app) {
     private var role = -1
-    private var accessToken = ""
     val loading = MutableStateFlow(false)
     val listUser = MutableStateFlow<MutableList<User>>(mutableListOf())
     val listUserByRole = MutableStateFlow<MutableList<User>>(mutableListOf())
+    val listTableActive = MutableStateFlow<MutableList<TableOrdering>>(mutableListOf())
+    val listOrder = MutableStateFlow<MutableList<OrderResponse>>(mutableListOf())
+    val listOrderDetailsByTable = MutableStateFlow<MutableList<OrderDetail>>(mutableListOf())
     var roleSelected = Role.TABLE.code
+    var tableIdSubscribe = app.UserId()
+    val orderChannelSubscribe get() = String.format(ORDER_CHANNEL_FORMAT, tableIdSubscribe)
+    var pageSelected = 0
 
-    init {
+    private var client = OkHttpClient()
+    private var ws: WebSocket? = null
+    lateinit var request: Request
+    private var connecting = false
+
+    override fun initViewModel() {
+        super.initViewModel()
         val sharedPref = app.getSharedPreferences(
             app.resources.getString(R.string.shared_file_name), Context.MODE_PRIVATE
         )
         role = sharedPref.getInt(app.resources.getString(R.string.key_role), -1)
-        sharedPref?.let {
-            accessToken =
-                it.getString(app.resources.getString(R.string.key_access_token), "").toString()
-        }
         getUsers()
+        initSocket()
+    }
+
+    fun subscribeChannel(userId: Int) {
+        tableIdSubscribe = userId
+        Log.e("tagSub", orderChannelSubscribe)
+        val param = JSONObject()
+        param.put(COMMAND, SUBSCRIBE)
+        param.put(IDENTIFIER, orderChannelSubscribe)
+        ws?.send(param.toString())
+    }
+
+    fun initSocket() {
+        client = OkHttpClient()
+        request = Request.Builder().url(WS_URL)
+            .addHeader(TOKEN, token).build()
+        ws = client.newWebSocket(request, object : WebSocketListener() {
+            override fun onOpen(webSocket: WebSocket, response: okhttp3.Response) {
+                val param = JSONObject()
+                param.put(COMMAND, SUBSCRIBE)
+                param.put(IDENTIFIER, Channel.MESSAGE_CHANNEL.channel)
+                ws?.send(param.toString())
+                connecting = true
+            }
+
+            override fun onMessage(webSocket: WebSocket, text: String) {
+                val res = GsonUtils.getGsonParser().fromJson(text, SocketResponse::class.java)
+                Log.e("tagX", text.toString())
+                when (res.identifier) {
+                    orderChannelSubscribe -> {
+                        getCurrentOrder(tableIdSubscribe) { b, mess, res ->
+                            if (b && res != null) setListOrderDetailsByTable(
+                                res.data?.order_details ?: mutableListOf()
+                            )
+                        }
+                    }
+                    Channel.MESSAGE_CHANNEL.channel -> {
+                        getListTableOrder()
+                    }
+                }
+            }
+
+            override fun onFailure(
+                webSocket: WebSocket,
+                t: Throwable,
+                response: okhttp3.Response?
+            ) {
+                Log.e("tagXFail", t.toString())
+                connecting = false
+                client.dispatcher().cancelAll()
+                viewModelScope.launch {
+                    delay(2000)
+                    if (!connecting) {
+                        initSocket()
+                    }
+                }
+            }
+
+            override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
+                Log.e("tagX", reason.toString())
+                connecting = false
+                client.dispatcher().cancelAll()
+            }
+
+        })
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        finalizeSocket()
+    }
+
+    fun finalizeSocket() {
+        ws?.send("finishing")
+        ws?.close(1001, null)
+        client.dispatcher().executorService().shutdown()
+        // client.connectionPool().evictAll()
     }
 
     fun createProduct(
@@ -61,7 +141,7 @@ class AdminViewModel(private val app: Application) : AndroidViewModel(app) {
         onDone: (Boolean, String, ProductEntity?) -> Unit
     ) {
         loading.value = true
-        val api = ProductApi.createProductApi(accessToken)
+        val api = ProductService.createProductApi(token)
         val file = File(RealPathUtil.getRealPath(app, uri))
         val imageRequestBody =
             app.getContentResolver().openInputStream(uri)
@@ -109,7 +189,7 @@ class AdminViewModel(private val app: Application) : AndroidViewModel(app) {
         onDone: (Boolean, String, ProductEntity?) -> Unit
     ) {
         loading.value = true
-        val api = ProductApi.createProductApi(accessToken)
+        val api = ProductService.createProductApi(token)
         var imageBody: MultipartBody.Part? = null
         if (uri != null) {
             val file = File(RealPathUtil.getRealPath(app, uri!!))
@@ -156,7 +236,7 @@ class AdminViewModel(private val app: Application) : AndroidViewModel(app) {
     }
 
     fun getUsers() {
-        val api = UserApi.createUserApi(accessToken)
+        val api = UserService.createUserApi(token)
         val res = api.getListUser()
         res.enqueue(object : Callback<UsersRes> {
             override fun onResponse(call: Call<UsersRes>, response: Response<UsersRes>) {
@@ -183,8 +263,9 @@ class AdminViewModel(private val app: Application) : AndroidViewModel(app) {
         }
     }
 
+
     fun createCategory(name: String, onDone: (Boolean, String, CategoryEntity?) -> Unit) {
-        val api = ProductApi.createProductApi(accessToken)
+        val api = ProductService.createProductApi(token)
         val res = api.createCategory(createRequestBody(name))
         res.enqueue(object : Callback<CategoryResponse> {
             override fun onResponse(
@@ -214,7 +295,7 @@ class AdminViewModel(private val app: Application) : AndroidViewModel(app) {
         role: String,
         onDone: (Boolean, String, User?) -> Unit
     ) {
-        val api = UserApi.createUserApi(accessToken)
+        val api = UserService.createUserApi(token)
         val login_id = createRequestBody(loginId)
         val display_name = createRequestBody(displayName)
         val password_req = createRequestBody(password)
@@ -256,7 +337,7 @@ class AdminViewModel(private val app: Application) : AndroidViewModel(app) {
         role: String,
         onDone: (Boolean, String, User?) -> Unit
     ) {
-        val api = UserApi.createUserApi(accessToken)
+        val api = UserService.createUserApi(token)
         val id_req = createRequestBody(id.toString())
         val display_name = createRequestBody(displayName)
         val status_req = createRequestBody(status)
@@ -269,7 +350,7 @@ class AdminViewModel(private val app: Application) : AndroidViewModel(app) {
                     val user = response.body()!!.data
                     list.addAll(listUser.value)
                     val index = list.indexOfFirst { it.id == id }
-                    list.set(index , user)
+                    list.set(index, user)
                     listUser.value = list
                     getListUserByRole(roleSelected)
                     onDone.invoke(true, "Edit Sucess", response.body()!!.data)
@@ -280,6 +361,49 @@ class AdminViewModel(private val app: Application) : AndroidViewModel(app) {
 
             override fun onFailure(call: Call<UserRes>, t: Throwable) {
                 onDone.invoke(false, t.message.toString(), null)
+            }
+        })
+    }
+
+    fun getListTableOrder() {
+        val api = OrderService.createOrderApi(token)
+        val res = api.getListOrdering()
+        res.enqueue(object : Callback<TableOrderingList> {
+            override fun onResponse(
+                call: Call<TableOrderingList>,
+                response: Response<TableOrderingList>
+            ) {
+                if (response.isSuccessful) {
+                    val list = response.body()!!.data
+                    listTableActive.value = list
+                } else {
+
+                }
+            }
+
+            override fun onFailure(call: Call<TableOrderingList>, t: Throwable) {
+            }
+        })
+    }
+
+    fun setListOrderDetailsByTable(mutableList: MutableList<OrderDetail>) {
+        listOrderDetailsByTable.value = mutableList
+    }
+
+    fun completeOrder() {
+        val api = OrderService.createOrderApi(token)
+        val res = api.completeOrder(tableIdSubscribe)
+        res.enqueue(object : Callback<OrderResponse> {
+            override fun onResponse(call: Call<OrderResponse>, response: Response<OrderResponse>) {
+                if (response.isSuccessful) {
+                    listOrderDetailsByTable.value = mutableListOf()
+                } else {
+
+                }
+            }
+
+            override fun onFailure(call: Call<OrderResponse>, t: Throwable) {
+
             }
         })
     }

@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.lifecycle.ViewModelProvider
 import com.bumptech.glide.Glide
+import com.example.myapplication.core.ItemStatus
 import com.example.myapplication.core.model.OrderDetail
 import com.example.myapplication.core.model.ProductEntity
 import com.example.myapplication.databinding.BottomSheetDialogBinding
@@ -77,12 +78,14 @@ class BottomSheetProductsFragment(private val activity: Context) : BottomSheetDi
             val index = viewModel.listOrderDetails.value.indexOfFirst {
                 it.product_id == orderDetails!!.product_id && it.status < 2
             }
-            if (index != -1) {
-                list.set(index, detail)
-                viewModel.setListOrder(list)
-                if (detail.status < 1) { // preparing
+            if ( viewModel.order.id != -1) { // đã submit , đã có Order
+                if (detail.status < ItemStatus.PREPARING.status) { // preparing
                     viewModel.updateOrderDetails(detail) { b, mess, data ->
                         Toast.makeText(activity, mess, Toast.LENGTH_LONG).show()
+                        if (b) {
+                            list.set(index, detail)
+                            viewModel.setListOrder(list)
+                        }
                     }
                 } else {
                     Toast.makeText(
@@ -91,6 +94,9 @@ class BottomSheetProductsFragment(private val activity: Context) : BottomSheetDi
                         Toast.LENGTH_LONG
                     ).show()
                 }
+            } else { // chưa có Order
+                list.set(index, detail)
+                viewModel.setListOrder(list)
             }
         }
     }
@@ -135,7 +141,7 @@ class BottomSheetProductsFragment(private val activity: Context) : BottomSheetDi
             it.id == id
         }
         orderDetails = viewModel.listOrderDetails.value.find {
-            (it.product_id == id && it.status < 2) // check ỏdetails có tồn tại và chưa preparing k
+            (it.product_id == id && it.status < ItemStatus.PREPARING.status) // check ỏdetails có tồn tại và chưa preparing k
         }
         if (orderDetails == null) { // tạo orderDetails mới
             mode = NEW_MODE

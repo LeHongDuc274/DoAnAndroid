@@ -66,4 +66,9 @@ class TabItemAdapter(private val context: Context) :
     fun setOnClick(action: (Int) -> Unit) {
         onClick = action
     }
+
+    fun setSelectedItem(pos : Int ){
+        selectedPos = pos
+        notifyDataSetChanged()
+    }
 }

@@ -12,7 +12,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.*
 
 
-interface UserApi {
+interface UserService {
 
     @POST("/authenticate")
     fun login(@Body requestBody: RequestBody): Call<LoginResponse>
@@ -49,7 +49,7 @@ interface UserApi {
 
 
     companion object {
-        fun createLoginApi(): UserApi {
+        fun createLoginApi(): UserService {
             val client = OkHttpClient.Builder().addInterceptor { chain ->
                 val newRequest: Request = chain.request().newBuilder()
                     .addHeader("Content-Type", "application/json")
@@ -59,10 +59,10 @@ interface UserApi {
             return Retrofit.Builder().baseUrl(BASE_URL)
                 .client(client)
                 .addConverterFactory(GsonConverterFactory.create())
-                .build().create(UserApi::class.java)
+                .build().create(UserService::class.java)
         }
 
-        fun createUserApi(token: String): UserApi {
+        fun createUserApi(token: String): UserService {
             val client = OkHttpClient.Builder().addInterceptor { chain ->
                 val newRequest: Request = chain.request().newBuilder()
                     .addHeader("Authorization", token)
@@ -74,7 +74,7 @@ interface UserApi {
                 .client(client)
                 .baseUrl(BASE_URL)
                 .addConverterFactory(GsonConverterFactory.create())
-                .build().create(UserApi::class.java)
+                .build().create(UserService::class.java)
         }
     }
 }

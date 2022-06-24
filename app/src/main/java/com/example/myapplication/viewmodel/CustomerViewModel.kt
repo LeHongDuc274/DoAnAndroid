@@ -1,88 +1,100 @@
 package com.example.myapplication.viewmodel
 
 import android.app.Application
-import android.util.Log
-import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import com.example.myapplication.core.api.OrderApi
-import com.example.myapplication.core.api.ProductApi
-import com.example.myapplication.core.api.response.CategoriesListResponse
+import com.example.myapplication.core.*
+import com.example.myapplication.core.api.OrderService
 import com.example.myapplication.core.api.response.OrderDetailRes
 import com.example.myapplication.core.api.response.OrderResponse
-import com.example.myapplication.core.api.response.products.ProductList
-import com.example.myapplication.core.model.CategoryEntity
+import com.example.myapplication.core.api.response.SocketResponse
 import com.example.myapplication.core.model.Order
 import com.example.myapplication.core.model.OrderDetail
 import com.example.myapplication.core.model.ProductEntity
-import com.example.myapplication.core.utils.Utils
-import com.example.myapplication.ext.AccessToken
+import com.example.myapplication.core.utils.GsonUtils
+import com.example.myapplication.ext.UserId
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.WebSocket
+import okhttp3.WebSocketListener
+import org.json.JSONObject
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
-class CustomerViewModel(private val app: Application) : AndroidViewModel(app) {
-    private var token = ""
-    val listCategories = MutableStateFlow<MutableList<CategoryEntity>>(mutableListOf())
-    val listProducts = MutableStateFlow<MutableList<ProductEntity>>(mutableListOf())
+class CustomerViewModel(private val app: Application) : BaseViewModel(app) {
+
     val listOrderDetails = MutableStateFlow<List<OrderDetail>>(listOf())
     val totalAmount = MutableStateFlow<Int>(0)
-    val listProductFilter =
-        MutableStateFlow<MutableList<ProductEntity>>(mutableListOf())
-    var categorySelected = -1
     var order: Order = Order()
+    private var client = OkHttpClient()
+    private var ws: WebSocket? = null
+    private var request: Request? = null
+    private var connection = false
+    var orderChannelIdent =
+        String.format("{\"channel\":\"OrderChannel\", \"user_id\": \"%d\"}", app.UserId())
 
-    init {
-        token = app.AccessToken()
-        val productApi = ProductApi.createProductApi(token)
-        viewModelScope.launch {
-            listProducts.collect {
-                Utils.setListProduct(it)
+    fun initSocket(onOrderDone: () -> Unit) {
+        client = OkHttpClient()
+        request = Request.Builder().url(WS_URL)
+            .addHeader(TOKEN, token).build()
+        ws = client.newWebSocket(request, object : WebSocketListener() {
+            override fun onOpen(webSocket: WebSocket, response: okhttp3.Response) {
+                val param = JSONObject()
+                param.put(COMMAND, SUBSCRIBE)
+                param.put(IDENTIFIER, orderChannelIdent)
+                ws?.send(param.toString())
+                connection = true
             }
-        }
-        productApi.getListCategories().enqueue(object : Callback<CategoriesListResponse> {
-            override fun onResponse(
-                call: Call<CategoriesListResponse>,
-                response: Response<CategoriesListResponse>
+
+            override fun onMessage(webSocket: WebSocket, text: String) {
+                val res = GsonUtils.getGsonParser().fromJson(text, SocketResponse::class.java)
+                when (res.identifier) {
+                    orderChannelIdent -> {
+                        getCurrentOrder(app.UserId()) { b, str, response ->
+                            response?.let {
+                                order = it.data ?: Order()
+                                setListOrder(response.data?.order_details ?: mutableListOf())
+                                if (order.id != -1) onOrderDone.invoke()
+                            }
+                        }
+                    }
+                    Channel.PRODUCT_CHANNEL.channel -> {
+                        //reload product
+                    }
+
+                }
+            }
+
+            override fun onFailure(
+                webSocket: WebSocket,
+                t: Throwable,
+                response: okhttp3.Response?
             ) {
-                if (response.isSuccessful) {
-                    val listdata = response.body()!!.data.toMutableList()
-                    viewModelScope.launch {
-                        listCategories.emit(listdata)
+                connection = false
+                client.dispatcher().cancelAll()
+                viewModelScope.launch {
+                    delay(2000)
+                    if (!connection) {
+                        initSocket{}
                     }
-                } else {
-                    Log.e("tag", response.code().toString())
                 }
             }
 
-            override fun onFailure(call: Call<CategoriesListResponse>, t: Throwable) {
-                Log.e("tag", t.message.toString())
+            override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
             }
 
-        })
-
-        productApi.getListProduct().enqueue(object : Callback<ProductList> {
-            override fun onResponse(call: Call<ProductList>, response: Response<ProductList>) {
-                if (response.isSuccessful) {
-                    val listdata = response.body()!!.data.toMutableList()
-                    viewModelScope.launch {
-                        listProducts.emit(listdata)
-                        setListProductByCategory(categorySelected)
-                    }
-                } else {
-                    Log.e("tag", response.code().toString())
-                }
-            }
-
-            override fun onFailure(call: Call<ProductList>, t: Throwable) {
-                Log.e("tag", t.message.toString())
-            }
         })
     }
 
+    fun finalizeSocket() {
+        ws?.send("finishing")
+        ws?.close(1001, null)
+        client.dispatcher().executorService().shutdown()
+        // client.connectionPool().evictAll()
+    }
 
     fun setListOrder(list: MutableList<OrderDetail>) {
         viewModelScope.launch {
@@ -90,29 +102,13 @@ class CustomerViewModel(private val app: Application) : AndroidViewModel(app) {
         }
     }
 
-    fun setListProductByCategory(id: Int = categorySelected) {
-        categorySelected = id
-        if (categorySelected == -1) {
-            viewModelScope.launch {
-                listProductFilter.emit(listProducts.value)
-            }
-        } else {
-            val listData = listProducts.value.filter {
-                it.category_id == id
-            }
-            viewModelScope.launch {
-                listProductFilter.emit(listData.toMutableList())
-            }
-        }
-    }
-
     fun createOrder(onDone: (Boolean, String, Order?) -> Unit) {
-        val api = OrderApi.createOrderApi(token)
+        val api = OrderService.createOrderApi(token)
         val res = api.createOrder(order)
         res.enqueue(object : Callback<OrderResponse> {
             override fun onResponse(call: Call<OrderResponse>, response: Response<OrderResponse>) {
                 if (response.isSuccessful) {
-                    val data = response.body()!!.data
+                    val data = response.body()!!.data!!
                     order = data
                     listOrderDetails.value = data.order_details
                     onDone.invoke(true, "Succes", data)
@@ -129,10 +125,13 @@ class CustomerViewModel(private val app: Application) : AndroidViewModel(app) {
     }
 
     fun createOrderDetail(detail: OrderDetail, onDone: (Boolean, String, OrderDetail?) -> Unit) {
-        val api = OrderApi.createOrderApi(token)
+        val api = OrderService.createOrderApi(token)
         val res = api.createOrderDetails(detail)
         res.enqueue(object : Callback<OrderDetailRes> {
-            override fun onResponse(call: Call<OrderDetailRes>, response: Response<OrderDetailRes>) {
+            override fun onResponse(
+                call: Call<OrderDetailRes>,
+                response: Response<OrderDetailRes>
+            ) {
                 if (response.isSuccessful) {
                     onDone.invoke(true, "Create detail succes", response.body()!!.data)
                 } else {
@@ -144,27 +143,6 @@ class CustomerViewModel(private val app: Application) : AndroidViewModel(app) {
                 onDone.invoke(false, t.message.toString(), null)
             }
         })
-
-
-    }
-
-    fun updateOrderDetails(detail: OrderDetail, onDone: (Boolean, String, OrderDetail?) -> Unit) {
-        val api = OrderApi.createOrderApi(token)
-        val res = api.updateOrderDetails(detail)
-        res.enqueue(object : Callback<OrderDetailRes> {
-            override fun onResponse(call: Call<OrderDetailRes>, response: Response<OrderDetailRes>) {
-                if (response.isSuccessful) {
-                    onDone.invoke(true, "Update Order detail succes", response.body()!!.data)
-                } else {
-                    onDone.invoke(false, response.code().toString(), null)
-                }
-            }
-
-            override fun onFailure(call: Call<OrderDetailRes>, t: Throwable) {
-                onDone.invoke(false, t.message.toString(), null)
-            }
-        })
-
     }
 
     private fun sum(pr: ProductEntity): Int {

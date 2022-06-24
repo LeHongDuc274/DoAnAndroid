@@ -12,7 +12,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.*
 
-interface ProductApi {
+interface ProductService {
 
     @GET("/products/index")
     fun getListProduct(): Call<ProductList>
@@ -53,7 +53,7 @@ interface ProductApi {
     fun deleteCategory(): Call<Response>
 
     companion object {
-        fun createProductApi(token: String): ProductApi {
+        fun createProductApi(token: String): ProductService {
             val client = OkHttpClient.Builder().addInterceptor { chain ->
                 val newRequest: Request = chain.request().newBuilder()
                     .addHeader("Authorization", token)
@@ -65,7 +65,7 @@ interface ProductApi {
                 .client(client)
                 .baseUrl(BASE_URL)
                 .addConverterFactory(GsonConverterFactory.create())
-                .build().create(ProductApi::class.java)
+                .build().create(ProductService::class.java)
         }
     }
 }

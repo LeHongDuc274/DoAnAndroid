@@ -12,9 +12,7 @@ import com.example.myapplication.core.model.CategoryEntity
 import com.example.myapplication.databinding.FragmentCategoriesManageBinding
 import com.example.myapplication.ext.collectFlow
 import com.example.myapplication.ui.adapter.CategoryAdapter
-import com.example.myapplication.ui.adapter.CategoryTabAdapter
 import com.example.myapplication.viewmodel.AdminViewModel
-import com.example.myapplication.viewmodel.CustomerViewModel
 import com.example.myapplication.wiget.BaseDialogFragment
 
 class CategoriesManageFragment() : BaseDialogFragment(R.layout.fragment_categories_manage) {
@@ -22,8 +20,8 @@ class CategoriesManageFragment() : BaseDialogFragment(R.layout.fragment_categori
     private var _binding: FragmentCategoriesManageBinding? = null
     private val binding get() = _binding!!
     private val categoryAdapter = CategoryAdapter()
-    private val viewmodel: CustomerViewModel by lazy {
-        ViewModelProvider(requireActivity())[CustomerViewModel::class.java]
+    private val viewmodel: AdminViewModel by lazy {
+        ViewModelProvider(requireActivity())[AdminViewModel::class.java]
     }
     private val adminViewModel: AdminViewModel by lazy {
         ViewModelProvider(requireActivity())[AdminViewModel::class.java]

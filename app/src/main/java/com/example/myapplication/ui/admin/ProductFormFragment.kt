@@ -29,7 +29,6 @@ import com.example.myapplication.databinding.FragmentProductFormBinding
 import com.example.myapplication.ext.collectFlow
 import com.example.myapplication.ui.adapter.SpinnerCategoryAdapter
 import com.example.myapplication.viewmodel.AdminViewModel
-import com.example.myapplication.viewmodel.CustomerViewModel
 import com.example.myapplication.wiget.BaseDialogFragment
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -44,10 +43,6 @@ class ProductFormFragment : BaseDialogFragment(R.layout.fragment_product_form) {
     private var product: ProductEntity? = null
     private val adminVM: AdminViewModel by lazy {
         ViewModelProvider(requireActivity())[AdminViewModel::class.java]
-    }
-
-    private val customerViewModel: CustomerViewModel by lazy {
-        ViewModelProvider(requireActivity())[CustomerViewModel::class.java]
     }
 
     override fun onCreateView(
@@ -77,7 +72,7 @@ class ProductFormFragment : BaseDialogFragment(R.layout.fragment_product_form) {
         binding.ivProduct.setOnClickListener {
             requestPermissionAndPickImage()
         }
-        collectFlow(customerViewModel.listCategories) {
+        collectFlow(adminVM.listCategories) {
             setDataSpinner(it)
         }
         collectFlow(adminVM.loading) {
@@ -131,10 +126,10 @@ class ProductFormFragment : BaseDialogFragment(R.layout.fragment_product_form) {
                         GlobalScope.launch {
 
                             var list = mutableListOf<ProductEntity>()
-                            list.addAll(customerViewModel.listProducts.value)
+                            list.addAll(adminVM.listProducts.value)
                             list.add(0, pr!!)
-                            customerViewModel.listProducts.emit(list)
-                            customerViewModel.setListProductByCategory(customerViewModel.categorySelected)
+                            adminVM.listProducts.emit(list)
+                            adminVM.setListProductByCategory(adminVM.categorySelected)
                         }
 
                     } else {
@@ -160,12 +155,12 @@ class ProductFormFragment : BaseDialogFragment(R.layout.fragment_product_form) {
                         dismiss()
                         GlobalScope.launch {
                             var list = mutableListOf<ProductEntity>()
-                            list.addAll(customerViewModel.listProducts.value)
+                            list.addAll(adminVM.listProducts.value)
                             val index =
-                                customerViewModel.listProducts.value.indexOfFirst { it.id == pr!!.id }
+                                adminVM.listProducts.value.indexOfFirst { it.id == pr!!.id }
                             list.set(index, pr!!)
-                            customerViewModel.listProducts.emit(list)
-                            customerViewModel.setListProductByCategory(customerViewModel.categorySelected)
+                            adminVM.listProducts.emit(list)
+                            adminVM.setListProductByCategory(adminVM.categorySelected)
                         }
                     } else {
                         Toast.makeText(requireActivity(), str, Toast.LENGTH_LONG).show()

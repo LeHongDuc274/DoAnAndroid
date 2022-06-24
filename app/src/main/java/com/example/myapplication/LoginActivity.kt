@@ -49,6 +49,7 @@ class LoginActivity : AppCompatActivity() {
                     putInt(getString(R.string.key_role), it.role)
                     putString(getString(R.string.key_access_token), it.access_token)
                     putString(getString(R.string.key_display_name),it.display_name)
+                    putInt(getString(R.string.key_id),it.id)
                     apply()
                 }
                 Log.e("tagRes",it.toString())

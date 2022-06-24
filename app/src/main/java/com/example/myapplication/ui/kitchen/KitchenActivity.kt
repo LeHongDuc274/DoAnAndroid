@@ -2,22 +2,26 @@ package com.example.myapplication.ui.kitchen
 
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.myapplication.BaseActivity
+import com.example.myapplication.core.model.OrderDetail
+import com.example.myapplication.core.utils.Utils
 import com.example.myapplication.databinding.ActivityKitchenBinding
-import com.example.myapplication.ext.AccessToken
 import com.example.myapplication.ext.collectFlow
-import okhttp3.*
-import okio.ByteString
-import org.json.JSONObject
+import com.example.myapplication.ui.adapter.OrderDetailKitchenAdapter
+import com.example.myapplication.viewmodel.KitchenViewModel
 
 
-class KitchenActivity : AppCompatActivity() {
+class KitchenActivity : BaseActivity() {
 
-    lateinit var client: OkHttpClient
-    lateinit var ws: WebSocket
-    lateinit var request: Request
     private lateinit var binding: ActivityKitchenBinding
+    private val pendingAdapter = OrderDetailKitchenAdapter()
+    private val preparingAdapter = OrderDetailKitchenAdapter()
+    private val completedAdapter = OrderDetailKitchenAdapter()
+
     private val kitchenVM: KitchenViewModel by lazy {
         ViewModelProvider(this)[KitchenViewModel::class.java]
     }
@@ -27,52 +31,64 @@ class KitchenActivity : AppCompatActivity() {
         binding = ActivityKitchenBinding.inflate(layoutInflater)
         setContentView(binding.root)
         initViews()
-//        initWebSocket()
-        initSocket()
+        initListener()
+    }
+
+    private fun initListener() {
+        kitchenVM.initViewModel()
+        collectFlow(kitchenVM.listProducts) {
+            if (it.isNotEmpty()) {
+                kitchenVM.initSocket()
+            }
+        }
+        pendingAdapter.setOnClick {
+            increaseStatus(it)
+        }
+        preparingAdapter.setOnClick {
+            increaseStatus(it)
+        }
+        completedAdapter.setOnClick {
+            increaseStatus(it)
+        }
+
+        collectFlow(kitchenVM.listPending) {
+            pendingAdapter.setData(it)
+        }
+        collectFlow(kitchenVM.listPreparing) {
+            preparingAdapter.setData(it)
+        }
+        collectFlow(kitchenVM.listComplete) {
+            completedAdapter.setData(it)
+        }
+    }
+
+    private fun increaseStatus(orderDetail: OrderDetail) {
+        orderDetail.apply {
+            status = status.inc()
+        }
+        kitchenVM.updateOrderDetails(orderDetail) { b, str, details ->
+            Toast.makeText(this, str, Toast.LENGTH_LONG).show()
+        }
+    }
+
+
+    private fun initViews() {
+        binding.rvPending.apply {
+            layoutManager = LinearLayoutManager(this@KitchenActivity)
+            adapter = pendingAdapter
+        }
+        binding.rvPreparing.apply {
+            layoutManager = LinearLayoutManager(this@KitchenActivity)
+            adapter = preparingAdapter
+        }
+        binding.rvCompleted.apply {
+            layoutManager = LinearLayoutManager(this@KitchenActivity)
+            adapter = completedAdapter
+        }
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        finalizeSocket()
-    }
-
-    private fun initViews() {
-        collectFlow(kitchenVM.listPending) {
-            Log.e("tagKitchen", it.size.toString())
-        }
-    }
-
-    fun initSocket() {
-        client = OkHttpClient()
-        // below url is public
-        request = Request.Builder().url("ws://192.168.1.2:3000/cable")
-            .addHeader("token", application.AccessToken()).build()
-        Log.e("tagToken",application.AccessToken())
-        ws = client.newWebSocket(request, object : WebSocketListener() {
-            override fun onOpen(webSocket: WebSocket, response: Response) {
-                Log.e("TagStart","Start Connect")
-                val paramObject = JSONObject()
-                paramObject.put("command", "subscribe")
-                paramObject.put("identifier", "{\"channel\":\"MessageChannel\"}")
-                ws.send(paramObject.toString())
-            }
-
-            override fun onMessage(webSocket: WebSocket, text: String) {
-                Log.e("tagMessage",text)
-            }
-
-            override fun onMessage(webSocket: WebSocket, bytes: ByteString) {
-//                super.onMessage(webSocket, bytes)
-                Log.e("tagMessageByte",bytes.toString())
-            }
-
-        })
-        client.dispatcher().executorService().shutdown()
-    }
-
-    fun finalizeSocket() {
-        ws.send("finishing")
-        ws.close(101, null)
-        client.connectionPool().evictAll()
+        kitchenVM.finalizeSocket()
     }
 }

@@ -1,9 +1,7 @@
 package com.example.myapplication.core.api
 
 import com.example.myapplication.core.BASE_URL
-import com.example.myapplication.core.api.response.OrderDetailRes
-import com.example.myapplication.core.api.response.OrderDetailsListRes
-import com.example.myapplication.core.api.response.OrderResponse
+import com.example.myapplication.core.api.response.*
 import com.example.myapplication.core.model.Order
 import com.example.myapplication.core.model.OrderDetail
 import okhttp3.OkHttpClient
@@ -11,15 +9,11 @@ import okhttp3.Request
 import retrofit2.Call
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import retrofit2.http.Body
-import retrofit2.http.GET
-import retrofit2.http.POST
-import retrofit2.http.PUT
+import retrofit2.http.*
 
-interface OrderApi {
+interface OrderService {
     @POST("/orders/create")
     fun createOrder(@Body order : Order): Call<OrderResponse>
-
 
     @PUT("/order_details/update")
     fun updateOrderDetails(@Body order : OrderDetail): Call<OrderDetailRes>
@@ -30,8 +24,17 @@ interface OrderApi {
     @GET("/order_details/ordering")
     fun getListOrderDetails() : Call<OrderDetailsListRes>
 
+    @GET("/orders/ordering")
+    fun getListOrdering() : Call<TableOrderingList>
+
+    @GET("/orders/order")
+    fun getCurrentOrder(@Query("user_id") user_id : Int = -1) :Call<OrderResponse>
+
+    @PATCH("/orders/complete")
+    fun completeOrder(@Query("user_id") user_id: Int) : Call<OrderResponse>
+
     companion object {
-        fun createOrderApi(token: String): OrderApi {
+        fun createOrderApi(token: String): OrderService {
             val client = OkHttpClient.Builder().addInterceptor { chain ->
                 val newRequest: Request = chain.request().newBuilder()
                     .addHeader("Authorization", token)
@@ -43,7 +46,7 @@ interface OrderApi {
                 .client(client)
                 .baseUrl(BASE_URL)
                 .addConverterFactory(GsonConverterFactory.create())
-                .build().create(OrderApi::class.java)
+                .build().create(OrderService::class.java)
         }
     }
 }
