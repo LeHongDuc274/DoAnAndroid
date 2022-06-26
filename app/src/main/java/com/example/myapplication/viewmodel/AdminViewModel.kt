@@ -56,8 +56,8 @@ class AdminViewModel(private val app: Application) : BaseViewModel(app) {
     }
 
     fun subscribeChannel(userId: Int) {
+
         tableIdSubscribe = userId
-        Log.e("tagSub", orderChannelSubscribe)
         val param = JSONObject()
         param.put(COMMAND, SUBSCRIBE)
         param.put(IDENTIFIER, orderChannelSubscribe)
@@ -79,7 +79,7 @@ class AdminViewModel(private val app: Application) : BaseViewModel(app) {
 
             override fun onMessage(webSocket: WebSocket, text: String) {
                 val res = GsonUtils.getGsonParser().fromJson(text, SocketResponse::class.java)
-                Log.e("tagX", text.toString())
+                Log.e("tagAdmin", text.toString())
                 when (res.identifier) {
                     orderChannelSubscribe -> {
                         getCurrentOrder(tableIdSubscribe) { b, mess, res ->

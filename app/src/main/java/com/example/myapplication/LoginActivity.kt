@@ -11,6 +11,7 @@ import com.example.myapplication.databinding.ActivityLoginBinding
 import com.example.myapplication.ui.admin.AdminActivity
 import com.example.myapplication.ui.customer.CustomerActivity
 import com.example.myapplication.ui.kitchen.KitchenActivity
+import com.example.myapplication.ui.staff.StaffActivity
 import com.example.myapplication.viewmodel.LoginViewModel
 
 class LoginActivity : AppCompatActivity() {
@@ -52,7 +53,6 @@ class LoginActivity : AppCompatActivity() {
                     putInt(getString(R.string.key_id),it.id)
                     apply()
                 }
-                Log.e("tagRes",it.toString())
                 when (it.role) {
                     0 -> { // admin
                         val intent = Intent(this, AdminActivity::class.java)
@@ -62,7 +62,10 @@ class LoginActivity : AppCompatActivity() {
                     }
 
                     1 -> { // staff
-
+                        val intent = Intent(this, StaffActivity::class.java)
+                        intent.flags =
+                            Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                        startActivity(intent)
                     }
 
                     2 -> { // kitchen

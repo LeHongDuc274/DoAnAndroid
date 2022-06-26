@@ -9,11 +9,31 @@
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_tab"
         android:layout_width="wrap_content"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
         android:background="@color/color_background_item"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/ll_v"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <LinearLayout
+        android:id="@+id/ll_v"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@color/color_background_item"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@id/rv_tab"
+        app:layout_constraintStart_toStartOf="@id/rv_tab">
+
+        <ImageView
+            android:id="@+id/iv_logout"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_margin="10dp"
+            android:src="@drawable/baseline_logout_black_48"
+            android:tintMode="src_atop" />
+    </LinearLayout>
+
 
     <com.example.myapplication.wiget.SwipeLockableViewPager
         android:id="@+id/vp_pages"

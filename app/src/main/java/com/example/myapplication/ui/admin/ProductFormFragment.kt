@@ -67,7 +67,6 @@ class ProductFormFragment : BaseDialogFragment(R.layout.fragment_product_form) {
             val productGson = requireArguments().getString(PRODUCT_EXTRA_KEY)
             product = GsonUtils.getGsonParser().fromJson(productGson, ProductEntity::class.java)
             initViewEditMode()
-            Log.e("tagDataOld", "${product!!.id}  ${product!!.name}")
         }
         binding.ivProduct.setOnClickListener {
             requestPermissionAndPickImage()

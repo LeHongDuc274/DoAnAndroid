@@ -7,7 +7,8 @@ data class OrderDetail(
     var product_id: Int = -1,
     var amount: Int = 0,
     var note: String = "",
-    var status: Int = -1
+    var status: Int = -1,
+    var user_display_name: String = ""
 ) {
     fun copyInstance(): OrderDetail {
         return OrderDetail(
@@ -17,7 +18,8 @@ data class OrderDetail(
             order_id = this.order_id,
             amount = this.amount,
             note = this.note,
-            status = this.status
+            status = this.status,
+            user_display_name = this.user_display_name
         )
     }
 }

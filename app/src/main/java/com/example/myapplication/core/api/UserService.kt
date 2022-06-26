@@ -47,6 +47,8 @@ interface UserService {
     @DELETE("/users/delete")
     fun deleteUser(): Call<Result>
 
+    @POST("/logout")
+    fun logout(@Body password: RequestBody) : Call<LoginResponse>
 
     companion object {
         fun createLoginApi(): UserService {

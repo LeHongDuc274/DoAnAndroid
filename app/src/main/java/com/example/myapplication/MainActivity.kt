@@ -8,6 +8,7 @@ import android.util.Log
 import com.example.myapplication.ui.admin.AdminActivity
 import com.example.myapplication.ui.customer.CustomerActivity
 import com.example.myapplication.ui.kitchen.KitchenActivity
+import com.example.myapplication.ui.staff.StaffActivity
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -37,7 +38,9 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 1 -> {
-
+                    val intent = Intent(this, StaffActivity::class.java)
+                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                    startActivity(intent)
                 }
 
                 2 -> {

@@ -1,9 +1,8 @@
 package com.example.myapplication.core
 
-
 const val APP_NAME = ""
-const val BASE_URL = "http://192.168.1.5:3000"
-const val WS_URL = "ws://192.168.1.5:3000/cable"
+const val BASE_URL = "http://192.168.1.6:3000"
+const val WS_URL = "ws://192.168.1.6:3000/cable"
 
 const val PRODUCT_EXTRA_KEY = "PRODUCT_EXTRA_KEY"
 const val USER_EXTRA_KEY = "USER_EXTRA_KEY"
@@ -36,7 +35,6 @@ enum class ItemStatus(val title: String, val status: Int) {
     DELIVERING("Delivering", 3),
     DELIVERED("Delivered", 4)
 }
-
 
 const val COMMAND = "command"
 const val SUBSCRIBE = "subscribe"

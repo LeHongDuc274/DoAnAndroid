@@ -3,7 +3,9 @@ package com.example.myapplication.ui.customer
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.View.GONE
+import android.view.View.VISIBLE
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.os.bundleOf
@@ -14,9 +16,12 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.myapplication.BaseActivity
 import com.example.myapplication.LoginActivity
 import com.example.myapplication.R
+import com.example.myapplication.core.utils.showDialogConfirmLogout
 import com.example.myapplication.databinding.ActivityCustomerBinding
 import com.example.myapplication.ext.DisplayName
 import com.example.myapplication.ext.collectFlow
+import com.example.myapplication.ext.gotoLogin
+import com.example.myapplication.ext.showToast
 import com.example.myapplication.ui.adapter.CategoryTabAdapter
 import com.example.myapplication.ui.adapter.OrderAdapter
 import com.example.myapplication.ui.adapter.ProductsAdapter
@@ -48,8 +53,9 @@ class CustomerActivity : BaseActivity() {
         collectFlow(viewmodel.listProducts) {
             viewmodel.setListProductByCategory()
             if (it.isNotEmpty()) {
-                viewmodel.initSocket {
-                    binding.tvBooking.visibility = GONE
+                viewmodel.initSocket { orderGone ->
+                    binding.tvBooking.visibility = if (orderGone) GONE else VISIBLE
+                    binding.tvBooking.isClickable = true
                 }
             }
         }
@@ -58,10 +64,9 @@ class CustomerActivity : BaseActivity() {
         }
         collectFlow(viewmodel.listOrderDetails) {
             orderAdapter.setData(it.toMutableList())
+            binding.tvTotalAmount.text = " ${viewmodel.subTotal()} vnđ"
         }
-        collectFlow(viewmodel.totalAmount) {
-            binding.tvTotalAmount.text = it.toString() + " vnđ"
-        }
+
         collectFlow(viewmodel.listCategories) {
             categoryAdapter.setData(it)
         }
@@ -94,25 +99,28 @@ class CustomerActivity : BaseActivity() {
             sheet.show(this.supportFragmentManager, it.product_id.toString())
         }
         // test LogOut
-        binding.ivIconMemu.setOnClickListener {
-            val sharedPref = getSharedPreferences(
-                getString(R.string.shared_file_name), Context.MODE_PRIVATE
-            ) ?: return@setOnClickListener
-            with(sharedPref.edit()) {
-                putInt(getString(R.string.key_role), -1)
-                putString(getString(R.string.key_access_token), "")
-                putString(getString(R.string.key_display_name), "")
-                putInt(getString(R.string.key_id), -1)
-                apply()
+        binding.ivIconMemu.setOnLongClickListener {
+            showDialogConfirmLogout {
+                if (it.isNotBlank()) {
+                    viewmodel.logout(it) { b, str ->
+                        if (b) {
+                            gotoLogin()
+                        } else {
+                            Toast.makeText(this, str, Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                } else {
+                    Toast.makeText(this, "Password is blank", Toast.LENGTH_SHORT).show()
+                }
             }
-            val intent = Intent(this, LoginActivity::class.java)
-            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-            startActivity(intent)
+            false
+
         }
+
         binding.tvBooking.setOnClickListener {
             when {
                 viewmodel.listOrderDetails.value.isEmpty() -> { // list empty
-                    Toast.makeText(this, "Cart Empty", Toast.LENGTH_SHORT).show()
+                    showToast("Cart Empty")
                 }
                 viewmodel.order.id == -1 && viewmodel.order.user_id == -1 -> { // order = empty -> create order
                     viewmodel.order.order_details.apply {
@@ -122,8 +130,6 @@ class CustomerActivity : BaseActivity() {
                     viewmodel.createOrder { b, mess, order ->
                         Toast.makeText(this, mess, Toast.LENGTH_LONG).show()
                         if (b) {
-                            binding.tvBooking.isEnabled = false
-                            binding.tvBooking.isClickable = false
                             binding.tvBooking.visibility = GONE
                         }
                     }
@@ -131,6 +137,7 @@ class CustomerActivity : BaseActivity() {
             }
         }
     }
+
 
     private fun initView() {
         binding.rvListProduct.apply {

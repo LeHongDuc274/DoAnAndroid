@@ -26,14 +26,13 @@ class KitchenViewModel(private val app: Application) : BaseViewModel(app) {
     val listPending = MutableStateFlow<MutableList<OrderDetail>>(mutableListOf())
     val listPreparing = MutableStateFlow<MutableList<OrderDetail>>(mutableListOf())
     val listComplete = MutableStateFlow<MutableList<OrderDetail>>(mutableListOf())
-
+    val listDelivering = MutableStateFlow<MutableList<OrderDetail>>(mutableListOf())
     var client = OkHttpClient()
     var ws: WebSocket? = null
     lateinit var request: Request
     private var connecting = false
 
     fun initSocket() {
-        Log.e("tagInit","ss")
         if (connecting) return
         request = Request.Builder().url(WS_URL)
             .addHeader(TOKEN, token).build()
@@ -42,7 +41,9 @@ class KitchenViewModel(private val app: Application) : BaseViewModel(app) {
             override fun onOpen(webSocket: WebSocket, response: okhttp3.Response) {
                 val param = JSONObject()
                 param.put(COMMAND, SUBSCRIBE)
-                param.put(IDENTIFIER, Channel.ORDER_DETAIL_KITCHEN_CHANNEL.channel)
+                val channel = JSONObject()
+                channel.put("channel", "OrderDetailChannel")
+                param.put(IDENTIFIER, channel.toString())
                 ws?.send(param.toString())
                 connecting = true
             }
@@ -70,7 +71,6 @@ class KitchenViewModel(private val app: Application) : BaseViewModel(app) {
             }
 
             override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
-                Log.e("tagClose", reason.toString())
                 connecting = false
                 client.dispatcher().cancelAll()
             }
@@ -109,17 +109,19 @@ class KitchenViewModel(private val app: Application) : BaseViewModel(app) {
     }
 
     fun setListFilter() {
-        var list = listOrderDetails.value.filter {
-            it.status == ItemStatus.PENDING.status
+        val mapDetailsByStatus = listOrderDetails.value.groupBy {
+            it.status
         }
-        listPending.value = list.toMutableList()
-        list = listOrderDetails.value.filter {
-            it.status == ItemStatus.PREPARING.status
-        }
-        listPreparing.value = list.toMutableList()
-        list = listOrderDetails.value.filter {
-            it.status == ItemStatus.COMPLETED.status
-        }
-        listComplete.value = list.toMutableList()
+        listPending.value =
+            mapDetailsByStatus[ItemStatus.PENDING.status]?.toMutableList() ?: mutableListOf()
+
+        listPreparing.value =
+            mapDetailsByStatus[ItemStatus.PREPARING.status]?.toMutableList() ?: mutableListOf()
+
+        listComplete.value =
+            mapDetailsByStatus[ItemStatus.COMPLETED.status]?.toMutableList() ?: mutableListOf()
+
+        listDelivering.value =
+            mapDetailsByStatus[ItemStatus.DELIVERING.status]?.toMutableList() ?: mutableListOf()
     }
 }

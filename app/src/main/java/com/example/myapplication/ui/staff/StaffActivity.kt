@@ -1,39 +1,34 @@
-package com.example.myapplication.ui.kitchen
+package com.example.myapplication.ui.staff
 
 import android.graphics.Color
 import android.graphics.PorterDuff
-import android.os.Bundle
-import android.util.Log
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import android.os.Bundle
+import android.widget.Toast
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.myapplication.BaseActivity
+import com.example.myapplication.R
 import com.example.myapplication.core.model.OrderDetail
-import com.example.myapplication.core.utils.Utils
 import com.example.myapplication.core.utils.showDialogConfirmLogout
 import com.example.myapplication.databinding.ActivityKitchenBinding
+import com.example.myapplication.databinding.ActivityStaffBinding
 import com.example.myapplication.ext.collectFlow
 import com.example.myapplication.ext.gotoLogin
 import com.example.myapplication.ext.showToast
 import com.example.myapplication.ui.adapter.OrderDetailKitchenAdapter
 import com.example.myapplication.viewmodel.KitchenViewModel
 
-
-class KitchenActivity : BaseActivity() {
-
-    private lateinit var binding: ActivityKitchenBinding
-    private val pendingAdapter = OrderDetailKitchenAdapter()
-    private val preparingAdapter = OrderDetailKitchenAdapter()
+class StaffActivity : AppCompatActivity() {
+    private lateinit var binding: ActivityStaffBinding
+    private val deliveringAdapter = OrderDetailKitchenAdapter()
     private val completedAdapter = OrderDetailKitchenAdapter()
-
     private val kitchenVM: KitchenViewModel by lazy {
         ViewModelProvider(this)[KitchenViewModel::class.java]
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityKitchenBinding.inflate(layoutInflater)
+        binding = ActivityStaffBinding.inflate(layoutInflater)
         setContentView(binding.root)
         initViews()
         initListener()
@@ -46,10 +41,7 @@ class KitchenActivity : BaseActivity() {
                 kitchenVM.initSocket()
             }
         }
-        pendingAdapter.setOnClick {
-            increaseStatus(it)
-        }
-        preparingAdapter.setOnClick {
+        deliveringAdapter.setOnClick {
             increaseStatus(it)
         }
         completedAdapter.setOnClick {
@@ -72,11 +64,9 @@ class KitchenActivity : BaseActivity() {
             }
         }
 
-        collectFlow(kitchenVM.listPending) {
-            pendingAdapter.setData(it)
-        }
-        collectFlow(kitchenVM.listPreparing) {
-            preparingAdapter.setData(it)
+
+        collectFlow(kitchenVM.listDelivering) {
+            deliveringAdapter.setData(it)
         }
         collectFlow(kitchenVM.listComplete) {
             completedAdapter.setData(it)
@@ -94,18 +84,18 @@ class KitchenActivity : BaseActivity() {
 
 
     private fun initViews() {
-        binding.rvPending.apply {
-            layoutManager = LinearLayoutManager(this@KitchenActivity)
-            adapter = pendingAdapter
-        }
-        binding.rvPreparing.apply {
-            layoutManager = LinearLayoutManager(this@KitchenActivity)
-            adapter = preparingAdapter
-        }
         binding.rvCompleted.apply {
-            layoutManager = LinearLayoutManager(this@KitchenActivity)
+            layoutManager = LinearLayoutManager(this@StaffActivity)
             adapter = completedAdapter
         }
+        binding.rvDelivering.apply {
+            layoutManager = LinearLayoutManager(this@StaffActivity)
+            adapter = deliveringAdapter
+        }
+//        binding.rvNotice.apply {
+//            layoutManager = LinearLayoutManager(this@StaffActivity)
+//            adapter = completedAdapter
+//        }
         binding.ivLogout.setColorFilter(
             Color.parseColor("#F44336"),
             PorterDuff.Mode.SRC_IN

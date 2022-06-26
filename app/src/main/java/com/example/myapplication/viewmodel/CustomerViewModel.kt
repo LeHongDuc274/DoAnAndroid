@@ -1,6 +1,7 @@
 package com.example.myapplication.viewmodel
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.viewModelScope
 import com.example.myapplication.core.*
 import com.example.myapplication.core.api.OrderService
@@ -14,6 +15,7 @@ import com.example.myapplication.core.utils.GsonUtils
 import com.example.myapplication.ext.UserId
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -27,7 +29,6 @@ import retrofit2.Response
 class CustomerViewModel(private val app: Application) : BaseViewModel(app) {
 
     val listOrderDetails = MutableStateFlow<List<OrderDetail>>(listOf())
-    val totalAmount = MutableStateFlow<Int>(0)
     var order: Order = Order()
     private var client = OkHttpClient()
     private var ws: WebSocket? = null
@@ -36,7 +37,7 @@ class CustomerViewModel(private val app: Application) : BaseViewModel(app) {
     var orderChannelIdent =
         String.format("{\"channel\":\"OrderChannel\", \"user_id\": \"%d\"}", app.UserId())
 
-    fun initSocket(onOrderDone: () -> Unit) {
+    fun initSocket(onOrderDone: (Boolean) -> Unit) {
         client = OkHttpClient()
         request = Request.Builder().url(WS_URL)
             .addHeader(TOKEN, token).build()
@@ -57,8 +58,9 @@ class CustomerViewModel(private val app: Application) : BaseViewModel(app) {
                             response?.let {
                                 order = it.data ?: Order()
                                 setListOrder(response.data?.order_details ?: mutableListOf())
-                                if (order.id != -1) onOrderDone.invoke()
+                                onOrderDone.invoke(order.id != -1)
                             }
+//                            }
                         }
                     }
                     Channel.PRODUCT_CHANNEL.channel -> {
@@ -78,7 +80,7 @@ class CustomerViewModel(private val app: Application) : BaseViewModel(app) {
                 viewModelScope.launch {
                     delay(2000)
                     if (!connection) {
-                        initSocket{}
+                        initSocket {}
                     }
                 }
             }
@@ -145,8 +147,14 @@ class CustomerViewModel(private val app: Application) : BaseViewModel(app) {
         })
     }
 
-    private fun sum(pr: ProductEntity): Int {
-        return ((pr.countOrder) * (pr.price))
+    fun subTotal(): Int {
+        return listOrderDetails.value.sumOf { detail ->
+            val product = listProducts.value.firstOrNull { p ->
+                p.id == detail.product_id
+            }
+            val price = product?.price ?: 0
+            detail.amount * price
+        }
     }
 
 }

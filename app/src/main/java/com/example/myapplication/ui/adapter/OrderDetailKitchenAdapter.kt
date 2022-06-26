@@ -1,5 +1,6 @@
 package com.example.myapplication.ui.adapter
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
@@ -21,6 +22,7 @@ class OrderDetailKitchenAdapter : RecyclerView.Adapter<OrderDetailKitchenAdapter
             product?.let {
                 binding.tvName.text = it.name
             }
+            binding.tvUserName.text = orderDetail.user_display_name
         }
     }
 
