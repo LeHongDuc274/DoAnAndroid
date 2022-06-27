@@ -1,16 +1,25 @@
 package com.example.myapplication.ui.staff
 
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.content.Context
 import android.graphics.Color
 import android.graphics.PorterDuff
+import android.media.RingtoneManager
+import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
+import android.view.View
 import android.widget.Toast
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.myapplication.MyApp
 import com.example.myapplication.R
 import com.example.myapplication.core.model.OrderDetail
 import com.example.myapplication.core.utils.showDialogConfirmLogout
-import com.example.myapplication.databinding.ActivityKitchenBinding
 import com.example.myapplication.databinding.ActivityStaffBinding
 import com.example.myapplication.ext.collectFlow
 import com.example.myapplication.ext.gotoLogin
@@ -36,16 +45,47 @@ class StaffActivity : AppCompatActivity() {
 
     private fun initListener() {
         kitchenVM.initViewModel()
-        collectFlow(kitchenVM.listProducts) {
-            if (it.isNotEmpty()) {
-                kitchenVM.initSocket()
+        collectFlow(kitchenVM.listMessageRequesting) {
+            if (it.isEmpty()) {
+                binding.tvCountMessage.visibility = View.GONE
+            } else {
+                binding.tvCountMessage.visibility = View.VISIBLE
+                binding.tvCountMessage.text = it.size.toString()
             }
         }
+        kitchenVM.getListTableMessage()
+        collectFlow(kitchenVM.listProducts) {
+            if (it.isNotEmpty()) {
+                kitchenVM.initSocket {
+                    val alarmSound =
+                        RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+                    val builder: NotificationCompat.Builder = NotificationCompat.Builder(
+                        this,
+                        MyApp.CHANNEL_ID
+                    )
+                    builder.apply {
+                        setContentTitle("Thong bao")
+                        setContentText("thong bao")
+                        setSmallIcon(R.drawable.ic_icons8_menu)
+                        setPriority(NotificationCompat.PRIORITY_MAX)
+                        setDefaults(NotificationCompat.DEFAULT_ALL)
+                    }
+
+                    val notificationManager = NotificationManagerCompat.from(this)
+                    notificationManager.notify(1, builder.build())
+                }
+            }
+        }
+
         deliveringAdapter.setOnClick {
             increaseStatus(it)
         }
         completedAdapter.setOnClick {
             increaseStatus(it)
+        }
+
+        binding.llMessage.setOnClickListener {
+            MessgeDialogFragment().show(supportFragmentManager, null)
         }
 
         binding.ivLogout.setOnClickListener {
@@ -97,6 +137,10 @@ class StaffActivity : AppCompatActivity() {
 //            adapter = completedAdapter
 //        }
         binding.ivLogout.setColorFilter(
+            Color.parseColor("#F44336"),
+            PorterDuff.Mode.SRC_IN
+        )
+        binding.ivMessage.setColorFilter(
             Color.parseColor("#F44336"),
             PorterDuff.Mode.SRC_IN
         )

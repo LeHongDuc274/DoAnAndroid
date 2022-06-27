@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import com.example.myapplication.ui.admin.AdminActivity
 import com.example.myapplication.ui.customer.CustomerActivity
 import com.example.myapplication.ui.kitchen.KitchenActivity

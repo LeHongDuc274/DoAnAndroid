@@ -3,14 +3,11 @@ package com.example.myapplication.ui.kitchen
 import android.graphics.Color
 import android.graphics.PorterDuff
 import android.os.Bundle
-import android.util.Log
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.myapplication.BaseActivity
 import com.example.myapplication.core.model.OrderDetail
-import com.example.myapplication.core.utils.Utils
 import com.example.myapplication.core.utils.showDialogConfirmLogout
 import com.example.myapplication.databinding.ActivityKitchenBinding
 import com.example.myapplication.ext.collectFlow

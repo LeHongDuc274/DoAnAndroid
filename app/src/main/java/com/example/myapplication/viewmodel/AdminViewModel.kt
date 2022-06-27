@@ -33,8 +33,8 @@ class AdminViewModel(private val app: Application) : BaseViewModel(app) {
     val listUser = MutableStateFlow<MutableList<User>>(mutableListOf())
     val listUserByRole = MutableStateFlow<MutableList<User>>(mutableListOf())
     val listTableActive = MutableStateFlow<MutableList<TableOrdering>>(mutableListOf())
-    val listOrder = MutableStateFlow<MutableList<OrderResponse>>(mutableListOf())
     val listOrderDetailsByTable = MutableStateFlow<MutableList<OrderDetail>>(mutableListOf())
+    val listMessageRequesting = MutableStateFlow<MutableList<Message>>(mutableListOf())
     var roleSelected = Role.TABLE.code
     var tableIdSubscribe = app.UserId()
     val orderChannelSubscribe get() = String.format(ORDER_CHANNEL_FORMAT, tableIdSubscribe)
@@ -80,16 +80,21 @@ class AdminViewModel(private val app: Application) : BaseViewModel(app) {
             override fun onMessage(webSocket: WebSocket, text: String) {
                 val res = GsonUtils.getGsonParser().fromJson(text, SocketResponse::class.java)
                 Log.e("tagAdmin", text.toString())
-                when (res.identifier) {
-                    orderChannelSubscribe -> {
+                when {
+                    res.identifier == orderChannelSubscribe -> {
                         getCurrentOrder(tableIdSubscribe) { b, mess, res ->
                             if (b && res != null) setListOrderDetailsByTable(
                                 res.data?.order_details ?: mutableListOf()
                             )
                         }
                     }
-                    Channel.MESSAGE_CHANNEL.channel -> {
+                    res.identifier == Channel.MESSAGE_CHANNEL.channel && res.message == FLAG_UPDATE_ORDER -> {
                         getListTableOrder()
+                    }
+
+                    res.identifier == Channel.MESSAGE_CHANNEL.channel && res.message == FLAG_UPDATE_MESSAGE -> {
+                        Log.e("tagmess", FLAG_UPDATE_MESSAGE)
+                        getListTableMessage()
                     }
                 }
             }
@@ -157,10 +162,10 @@ class AdminViewModel(private val app: Application) : BaseViewModel(app) {
             createRequestBody(category_id),
             imageBody
         )
-        res.enqueue(object : Callback<ProductCreateRes> {
+        res.enqueue(object : Callback<MyResult<ProductEntity>> {
             override fun onResponse(
-                call: Call<ProductCreateRes>,
-                response: Response<ProductCreateRes>
+                call: Call<MyResult<ProductEntity>>,
+                response: Response<MyResult<ProductEntity>>
             ) {
                 loading.value = false
                 if (response.isSuccessful) {
@@ -170,7 +175,7 @@ class AdminViewModel(private val app: Application) : BaseViewModel(app) {
                 }
             }
 
-            override fun onFailure(call: Call<ProductCreateRes>, t: Throwable) {
+            override fun onFailure(call: Call<MyResult<ProductEntity>>, t: Throwable) {
                 loading.value = false
                 onDone.invoke(false, t.message.toString(), null)
             }
@@ -215,10 +220,10 @@ class AdminViewModel(private val app: Application) : BaseViewModel(app) {
             map,
             imageBody
         )
-        res.enqueue(object : Callback<ProductCreateRes> {
+        res.enqueue(object : Callback<MyResult<ProductEntity>> {
             override fun onResponse(
-                call: Call<ProductCreateRes>,
-                response: Response<ProductCreateRes>
+                call: Call<MyResult<ProductEntity>>,
+                response: Response<MyResult<ProductEntity>>
             ) {
                 loading.value = false
                 if (response.isSuccessful) {
@@ -228,7 +233,7 @@ class AdminViewModel(private val app: Application) : BaseViewModel(app) {
                 }
             }
 
-            override fun onFailure(call: Call<ProductCreateRes>, t: Throwable) {
+            override fun onFailure(call: Call<MyResult<ProductEntity>>, t: Throwable) {
                 loading.value = false
                 onDone.invoke(false, t.message.toString(), null)
             }
@@ -238,8 +243,11 @@ class AdminViewModel(private val app: Application) : BaseViewModel(app) {
     fun getUsers() {
         val api = UserService.createUserApi(token)
         val res = api.getListUser()
-        res.enqueue(object : Callback<UsersRes> {
-            override fun onResponse(call: Call<UsersRes>, response: Response<UsersRes>) {
+        res.enqueue(object : Callback<MyResult<List<User>>> {
+            override fun onResponse(
+                call: Call<MyResult<List<User>>>,
+                response: Response<MyResult<List<User>>>
+            ) {
                 if (response.isSuccessful) {
                     listUser.value = response.body()!!.data.toMutableList()
                     getListUserByRole(roleSelected)
@@ -248,7 +256,7 @@ class AdminViewModel(private val app: Application) : BaseViewModel(app) {
                 }
             }
 
-            override fun onFailure(call: Call<UsersRes>, t: Throwable) {
+            override fun onFailure(call: Call<MyResult<List<User>>>, t: Throwable) {
 
             }
 
@@ -267,10 +275,10 @@ class AdminViewModel(private val app: Application) : BaseViewModel(app) {
     fun createCategory(name: String, onDone: (Boolean, String, CategoryEntity?) -> Unit) {
         val api = ProductService.createProductApi(token)
         val res = api.createCategory(createRequestBody(name))
-        res.enqueue(object : Callback<CategoryResponse> {
+        res.enqueue(object : Callback<MyResult<CategoryEntity>> {
             override fun onResponse(
-                call: Call<CategoryResponse>,
-                response: Response<CategoryResponse>
+                call: Call<MyResult<CategoryEntity>>,
+                response: Response<MyResult<CategoryEntity>>
             ) {
                 if (response.isSuccessful) {
                     onDone.invoke(true, "Add succes", response.body()!!.data)
@@ -279,7 +287,7 @@ class AdminViewModel(private val app: Application) : BaseViewModel(app) {
                 }
             }
 
-            override fun onFailure(call: Call<CategoryResponse>, t: Throwable) {
+            override fun onFailure(call: Call<MyResult<CategoryEntity>>, t: Throwable) {
                 onDone.invoke(false, t.message.toString(), null)
             }
 
@@ -310,8 +318,11 @@ class AdminViewModel(private val app: Application) : BaseViewModel(app) {
             role_req,
             status_req
         )
-        res.enqueue(object : Callback<UserRes> {
-            override fun onResponse(call: Call<UserRes>, response: Response<UserRes>) {
+        res.enqueue(object : Callback<MyResult<User>> {
+            override fun onResponse(
+                call: Call<MyResult<User>>,
+                response: Response<MyResult<User>>
+            ) {
                 if (response.isSuccessful) {
                     var list = mutableListOf<User>()
                     list.add(response.body()!!.data)
@@ -324,7 +335,7 @@ class AdminViewModel(private val app: Application) : BaseViewModel(app) {
                 }
             }
 
-            override fun onFailure(call: Call<UserRes>, t: Throwable) {
+            override fun onFailure(call: Call<MyResult<User>>, t: Throwable) {
                 onDone.invoke(false, t.message.toString(), null)
             }
         })
@@ -343,8 +354,11 @@ class AdminViewModel(private val app: Application) : BaseViewModel(app) {
         val status_req = createRequestBody(status)
         val role_req = createRequestBody(role)
         val res = api.editUser(id_req, display_name, role_req, status_req)
-        res.enqueue(object : Callback<UserRes> {
-            override fun onResponse(call: Call<UserRes>, response: Response<UserRes>) {
+        res.enqueue(object : Callback<MyResult<User>> {
+            override fun onResponse(
+                call: Call<MyResult<User>>,
+                response: Response<MyResult<User>>
+            ) {
                 if (response.isSuccessful) {
                     val list = mutableListOf<User>()
                     val user = response.body()!!.data
@@ -359,7 +373,7 @@ class AdminViewModel(private val app: Application) : BaseViewModel(app) {
                 }
             }
 
-            override fun onFailure(call: Call<UserRes>, t: Throwable) {
+            override fun onFailure(call: Call<MyResult<User>>, t: Throwable) {
                 onDone.invoke(false, t.message.toString(), null)
             }
         })
@@ -368,10 +382,10 @@ class AdminViewModel(private val app: Application) : BaseViewModel(app) {
     fun getListTableOrder() {
         val api = OrderService.createOrderApi(token)
         val res = api.getListOrdering()
-        res.enqueue(object : Callback<TableOrderingList> {
+        res.enqueue(object : Callback<MyResult<MutableList<TableOrdering>>> {
             override fun onResponse(
-                call: Call<TableOrderingList>,
-                response: Response<TableOrderingList>
+                call: Call<MyResult<MutableList<TableOrdering>>>,
+                response: Response<MyResult<MutableList<TableOrdering>>>
             ) {
                 if (response.isSuccessful) {
                     val list = response.body()!!.data
@@ -381,8 +395,31 @@ class AdminViewModel(private val app: Application) : BaseViewModel(app) {
                 }
             }
 
-            override fun onFailure(call: Call<TableOrderingList>, t: Throwable) {
+            override fun onFailure(call: Call<MyResult<MutableList<TableOrdering>>>, t: Throwable) {
             }
+        })
+    }
+
+    fun getListTableMessage() {
+        val api = UserService.createUserApi(token)
+        val res = api.getListMessageRequesting()
+        res.enqueue(object : Callback<MyResult<List<Message>>> {
+            override fun onResponse(
+                call: Call<MyResult<List<Message>>>,
+                response: Response<MyResult<List<Message>>>
+            ) {
+                if (response.isSuccessful) {
+                    val list = response.body()!!.data
+                    listMessageRequesting.value = list.toMutableList()
+                } else {
+
+                }
+            }
+
+            override fun onFailure(call: Call<MyResult<List<Message>>>, t: Throwable) {
+
+            }
+
         })
     }
 
@@ -393,8 +430,11 @@ class AdminViewModel(private val app: Application) : BaseViewModel(app) {
     fun completeOrder() {
         val api = OrderService.createOrderApi(token)
         val res = api.completeOrder(tableIdSubscribe)
-        res.enqueue(object : Callback<OrderResponse> {
-            override fun onResponse(call: Call<OrderResponse>, response: Response<OrderResponse>) {
+        res.enqueue(object : Callback<MyResult<Order?>> {
+            override fun onResponse(
+                call: Call<MyResult<Order?>>,
+                response: Response<MyResult<Order?>>
+            ) {
                 if (response.isSuccessful) {
                     listOrderDetailsByTable.value = mutableListOf()
                 } else {
@@ -402,7 +442,7 @@ class AdminViewModel(private val app: Application) : BaseViewModel(app) {
                 }
             }
 
-            override fun onFailure(call: Call<OrderResponse>, t: Throwable) {
+            override fun onFailure(call: Call<MyResult<Order?>>, t: Throwable) {
 
             }
         })

@@ -13,25 +13,25 @@ import retrofit2.http.*
 
 interface OrderService {
     @POST("/orders/create")
-    fun createOrder(@Body order : Order): Call<OrderResponse>
+    fun createOrder(@Body order : Order): Call<MyResult<Order?>>
 
     @PUT("/order_details/update")
-    fun updateOrderDetails(@Body order : OrderDetail): Call<OrderDetailRes>
+    fun updateOrderDetails(@Body order : OrderDetail): Call<MyResult<OrderDetail>>
 
     @POST("/order_details/create")
-    fun createOrderDetails(@Body order : OrderDetail): Call<OrderDetailRes>
+    fun createOrderDetails(@Body order : OrderDetail): Call<MyResult<OrderDetail>>
 
     @GET("/order_details/ordering")
-    fun getListOrderDetails() : Call<OrderDetailsListRes>
+    fun getListOrderDetails() : Call<MyResult<List<OrderDetail>>>
 
     @GET("/orders/ordering")
-    fun getListOrdering() : Call<TableOrderingList>
+    fun getListOrdering() : Call<MyResult<MutableList<TableOrdering>>>
 
     @GET("/orders/order")
-    fun getCurrentOrder(@Query("user_id") user_id : Int = -1) :Call<OrderResponse>
+    fun getCurrentOrder(@Query("user_id") user_id : Int = -1) :Call<MyResult<Order?>>
 
     @PATCH("/orders/complete")
-    fun completeOrder(@Query("user_id") user_id: Int) : Call<OrderResponse>
+    fun completeOrder(@Query("user_id") user_id: Int) : Call<MyResult<Order?>>
 
     companion object {
         fun createOrderApi(token: String): OrderService {

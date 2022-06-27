@@ -13,10 +13,8 @@ import androidx.core.view.children
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
 import com.example.myapplication.R
-import com.example.myapplication.core.PRODUCT_EXTRA_KEY
 import com.example.myapplication.core.Role
 import com.example.myapplication.core.USER_EXTRA_KEY
-import com.example.myapplication.core.model.ProductEntity
 import com.example.myapplication.core.model.User
 import com.example.myapplication.core.utils.GsonUtils
 import com.example.myapplication.databinding.FragmentSettingBinding

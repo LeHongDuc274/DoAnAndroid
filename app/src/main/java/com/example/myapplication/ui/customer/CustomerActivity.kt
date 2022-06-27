@@ -1,22 +1,19 @@
 package com.example.myapplication.ui.customer
 
-import android.content.Context
-import android.content.Intent
+import android.graphics.Color
+import android.graphics.PorterDuff
 import android.os.Bundle
-import android.util.Log
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.os.bundleOf
 import androidx.core.view.GravityCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.myapplication.BaseActivity
-import com.example.myapplication.LoginActivity
-import com.example.myapplication.R
 import com.example.myapplication.core.utils.showDialogConfirmLogout
+import com.example.myapplication.core.utils.showDialogResquestStaff
 import com.example.myapplication.databinding.ActivityCustomerBinding
 import com.example.myapplication.ext.DisplayName
 import com.example.myapplication.ext.collectFlow
@@ -26,8 +23,6 @@ import com.example.myapplication.ui.adapter.CategoryTabAdapter
 import com.example.myapplication.ui.adapter.OrderAdapter
 import com.example.myapplication.ui.adapter.ProductsAdapter
 import com.example.myapplication.viewmodel.CustomerViewModel
-import java.text.SimpleDateFormat
-import java.util.*
 
 
 class CustomerActivity : BaseActivity() {
@@ -136,6 +131,17 @@ class CustomerActivity : BaseActivity() {
                 }
             }
         }
+
+        binding.ivCart.setOnClickListener {
+            binding.root.openDrawer(GravityCompat.END)
+        }
+        binding.ivRequestStaff.setOnClickListener {
+            showDialogResquestStaff { content ->
+                viewmodel.createMessageRequest(content){
+                    showToast(it)
+                }
+            }
+        }
     }
 
 
@@ -156,9 +162,15 @@ class CustomerActivity : BaseActivity() {
             adapter = categoryAdapter
         }
 
-        val sdf = SimpleDateFormat("dd/MM/yyyy")
-        binding.tvTime.text = sdf.format(Calendar.getInstance(TimeZone.getTimeZone("GMT+7")).time)
         binding.tvTableName.text = application.DisplayName()
+        binding.ivRequestStaff.setColorFilter(
+            Color.parseColor("#FFFFFF"),
+            PorterDuff.Mode.SRC_IN
+        )
+        binding.ivCart.setColorFilter(
+            Color.parseColor("#FFFFFF"),
+            PorterDuff.Mode.SRC_IN
+        )
     }
 
     private fun showBottomSheetDialog(id: Int) {

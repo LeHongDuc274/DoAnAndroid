@@ -7,52 +7,31 @@ data class Result(
     var data: Any
 )
 
-data class CategoriesListResponse(
-    val `data`: List<CategoryEntity>,
-    val status: Boolean
-)
-
-data class ProductCreateRes(
-    val `data`: ProductEntity,
-    val status: Boolean
-)
-
-data class UsersRes(
-    val `data`: List<User>,
-    val status: Boolean
-)
-
-data class UserRes(
-    val `data`: User,
-    val status: Boolean
-)
-
-data class CategoryResponse(
-    val `data`: CategoryEntity,
-    val status: Boolean
-)
-
-data class OrderResponse(
-    val status : Boolean,
-    val `data` : Order?,
-)
-
-data class OrderDetailRes(
+data class MyResult<T>(
     val status: Boolean,
-    val `data` : OrderDetail
-)
-
-data class OrderDetailsListRes(
-    val status: Boolean,
-    val `data` : List<OrderDetail>
-)
-data class TableOrderingList(
-    val status: Boolean,
-    var `data`: MutableList<TableOrdering>
+    val data : T
 )
 
 data class TableOrdering(
     val display_name: String,
     val user_id: Int,
-    val order : Order?
+    val order: Order?
+)
+
+data class Message(
+    val id: Int,
+    val user_id: Int,
+    val user_name: String,
+    val content: String,
+    val status: Int,
+    val created_at: String
+)
+
+data class UserResponse(
+    val id: Int,
+    val login_id: String,
+    val display_name: String,
+    val access_token: String,
+    val status: Int,
+    val role: Int
 )

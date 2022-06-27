@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/color_background_item"
+    android:layout_margin="8dp"
+    android:padding="8dp">
+
+    <TextView
+        android:id="@+id/tv_table_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="1234"
+        android:textColor="@color/white"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/tv_time"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="12dp"
+        android:gravity="end"
+        android:text="12321"
+        android:textColor="@color/color_red"
+        android:textSize="14sp"
+        app:layout_constraintEnd_toStartOf="@id/iv_next"
+        app:layout_constraintStart_toEndOf="@id/tv_table_name"
+        app:layout_constraintTop_toBottomOf="@id/tv_table_name"
+        app:layout_constraintTop_toTopOf="parent" />
+
+
+    <TextView
+        android:id="@+id/tv_content"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:textColor="@color/white"
+        app:layout_constraintEnd_toStartOf="@id/iv_next"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tv_table_name" />
+
+    <ImageView
+        android:id="@+id/iv_next"
+        android:layout_width="24dp"
+        android:layout_height="wrap_content"
+        android:src="@drawable/outline_start"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+</androidx.constraintlayout.widget.ConstraintLayout>

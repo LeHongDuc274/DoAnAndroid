@@ -2,7 +2,7 @@ package com.example.myapplication.core.api
 
 import com.example.myapplication.core.BASE_URL
 import com.example.myapplication.core.api.response.*
-import com.example.myapplication.core.api.response.user.LoginResponse
+import com.example.myapplication.core.model.User
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody
@@ -15,7 +15,7 @@ import retrofit2.http.*
 interface UserService {
 
     @POST("/authenticate")
-    fun login(@Body requestBody: RequestBody): Call<LoginResponse>
+    fun login(@Body requestBody: RequestBody): Call<MyResult<UserResponse>>
 
     @Multipart
     @POST("/users/create")
@@ -26,13 +26,13 @@ interface UserService {
         @Part("password_confirmation") password_confirmation: RequestBody,
         @Part("role") role: RequestBody,
         @Part("status") status: RequestBody,
-    ): Call<UserRes>
+    ): Call<MyResult<User>>
 
     @GET("/users/index")
-    fun getListUser(): Call<UsersRes>
+    fun getListUser(): Call<MyResult<List<User>>>
 
     @GET("/users/tables")
-    fun getListTable(): Call<UsersRes>
+    fun getListTable(): Call<MyResult<List<User>>>
 
     @Multipart
     @PATCH("/users/edit")
@@ -41,14 +41,21 @@ interface UserService {
         @Part("display_name") display_name: RequestBody,
         @Part("role") role: RequestBody,
         @Part("status") status: RequestBody
-        ): Call<UserRes>
+        ): Call<MyResult<User>>
 
 
     @DELETE("/users/delete")
     fun deleteUser(): Call<Result>
 
     @POST("/logout")
-    fun logout(@Body password: RequestBody) : Call<LoginResponse>
+    fun logout(@Body password: RequestBody) : Call<MyResult<UserResponse>>
+
+    @POST("/messages/create")
+    fun createMessage(@Body content: RequestBody) : Call<MyResult<Message>>
+
+    @GET("/messages/requesting")
+    fun getListMessageRequesting(): Call<MyResult<List<Message>>>
+
 
     companion object {
         fun createLoginApi(): UserService {

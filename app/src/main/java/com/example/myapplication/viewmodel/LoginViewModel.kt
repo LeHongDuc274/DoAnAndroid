@@ -3,8 +3,8 @@ package com.example.myapplication.viewmodel
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import com.example.myapplication.core.api.UserService
-import com.example.myapplication.core.api.response.user.LoginResponse
-import com.example.myapplication.core.api.response.user.UserResponse
+import com.example.myapplication.core.api.response.MyResult
+import com.example.myapplication.core.api.response.UserResponse
 import okhttp3.MediaType
 import okhttp3.RequestBody
 import org.json.JSONObject
@@ -25,8 +25,8 @@ class LoginViewModel(private val app: Application) : AndroidViewModel(app) {
         )
         val api = UserService.createLoginApi()
         val res = api.login(body)
-        res.enqueue(object : Callback<LoginResponse> {
-            override fun onResponse(call: Call<LoginResponse>, rep: Response<LoginResponse>) {
+        res.enqueue(object : Callback<MyResult<UserResponse>> {
+            override fun onResponse(call: Call<MyResult<UserResponse>>, rep: Response<MyResult<UserResponse>>) {
                 if (rep.isSuccessful) {
                     rep.body()?.let {
                         if (it.status) {
@@ -40,7 +40,7 @@ class LoginViewModel(private val app: Application) : AndroidViewModel(app) {
                 }
             }
 
-            override fun onFailure(call: Call<LoginResponse>, t: Throwable) {
+            override fun onFailure(call: Call<MyResult<UserResponse>>, t: Throwable) {
                 onDone.invoke(null)
             }
         })

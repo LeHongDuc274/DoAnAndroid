@@ -2,24 +2,20 @@ package com.example.myapplication.viewmodel
 
 import android.app.Application
 import android.content.Context
-import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.myapplication.R
 import com.example.myapplication.core.api.OrderService
 import com.example.myapplication.core.api.ProductService
 import com.example.myapplication.core.api.UserService
-import com.example.myapplication.core.api.response.CategoriesListResponse
-import com.example.myapplication.core.api.response.OrderDetailRes
-import com.example.myapplication.core.api.response.OrderResponse
-import com.example.myapplication.core.api.response.products.ProductList
-import com.example.myapplication.core.api.response.user.LoginResponse
+import com.example.myapplication.core.api.response.MyResult
+import com.example.myapplication.core.api.response.UserResponse
 import com.example.myapplication.core.model.CategoryEntity
+import com.example.myapplication.core.model.Order
 import com.example.myapplication.core.model.OrderDetail
 import com.example.myapplication.core.model.ProductEntity
 import com.example.myapplication.core.utils.Utils
 import com.example.myapplication.ext.AccessToken
-import com.example.myapplication.ext.createRequestBody
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
@@ -46,10 +42,10 @@ open class BaseViewModel(private val app: Application) : AndroidViewModel(app) {
                 Utils.setListProduct(it)
             }
         }
-        productApi.getListCategories().enqueue(object : Callback<CategoriesListResponse> {
+        productApi.getListCategories().enqueue(object : Callback<MyResult<List<CategoryEntity>>> {
             override fun onResponse(
-                call: Call<CategoriesListResponse>,
-                response: Response<CategoriesListResponse>
+                call: Call<MyResult<List<CategoryEntity>>>,
+                response: Response<MyResult<List<CategoryEntity>>>
             ) {
                 if (response.isSuccessful) {
                     val listdata = response.body()!!.data.toMutableList()
@@ -60,12 +56,12 @@ open class BaseViewModel(private val app: Application) : AndroidViewModel(app) {
                 }
             }
 
-            override fun onFailure(call: Call<CategoriesListResponse>, t: Throwable) {
+            override fun onFailure(call: Call<MyResult<List<CategoryEntity>>>, t: Throwable) {
             }
         })
 
-        productApi.getListProduct().enqueue(object : Callback<ProductList> {
-            override fun onResponse(call: Call<ProductList>, response: Response<ProductList>) {
+        productApi.getListProduct().enqueue(object : Callback<MyResult<List<ProductEntity>>> {
+            override fun onResponse(call: Call<MyResult<List<ProductEntity>>>, response: Response<MyResult<List<ProductEntity>>>) {
                 if (response.isSuccessful) {
                     val listdata = response.body()!!.data.toMutableList()
                     viewModelScope.launch {
@@ -76,7 +72,7 @@ open class BaseViewModel(private val app: Application) : AndroidViewModel(app) {
                 }
             }
 
-            override fun onFailure(call: Call<ProductList>, t: Throwable) {
+            override fun onFailure(call: Call<MyResult<List<ProductEntity>>>, t: Throwable) {
             }
         })
     }
@@ -84,10 +80,10 @@ open class BaseViewModel(private val app: Application) : AndroidViewModel(app) {
     fun updateOrderDetails(detail: OrderDetail, onDone: (Boolean, String, OrderDetail?) -> Unit) {
         val api = OrderService.createOrderApi(token)
         val res = api.updateOrderDetails(detail)
-        res.enqueue(object : Callback<OrderDetailRes> {
+        res.enqueue(object : Callback<MyResult<OrderDetail>> {
             override fun onResponse(
-                call: Call<OrderDetailRes>,
-                response: Response<OrderDetailRes>
+                call: Call<MyResult<OrderDetail>>,
+                response: Response<MyResult<OrderDetail>>
             ) {
                 if (response.isSuccessful) {
                     onDone.invoke(true, "Update Order detail succes", response.body()!!.data)
@@ -96,7 +92,7 @@ open class BaseViewModel(private val app: Application) : AndroidViewModel(app) {
                 }
             }
 
-            override fun onFailure(call: Call<OrderDetailRes>, t: Throwable) {
+            override fun onFailure(call: Call<MyResult<OrderDetail>>, t: Throwable) {
                 onDone.invoke(false, t.message.toString(), null)
             }
         })
@@ -118,11 +114,11 @@ open class BaseViewModel(private val app: Application) : AndroidViewModel(app) {
         }
     }
 
-    fun getCurrentOrder(id: Int = -1, onDone: (Boolean, String, OrderResponse?) -> Unit) {
+    fun getCurrentOrder(id: Int = -1, onDone: (Boolean, String, MyResult<Order?>?) -> Unit) {
         val api = OrderService.createOrderApi(token)
         val res = api.getCurrentOrder(id)
-        res.enqueue(object : Callback<OrderResponse> {
-            override fun onResponse(call: Call<OrderResponse>, response: Response<OrderResponse>) {
+        res.enqueue(object : Callback<MyResult<Order?>> {
+            override fun onResponse(call: Call<MyResult<Order?>>, response: Response<MyResult<Order?>>) {
                 if (response.isSuccessful) {
                     onDone.invoke(true, "", response.body())
                 } else {
@@ -130,7 +126,7 @@ open class BaseViewModel(private val app: Application) : AndroidViewModel(app) {
                 }
             }
 
-            override fun onFailure(call: Call<OrderResponse>, t: Throwable) {
+            override fun onFailure(call: Call<MyResult<Order?>>, t: Throwable) {
                 onDone.invoke(false, t.message.toString(), null)
             }
 
@@ -147,8 +143,8 @@ open class BaseViewModel(private val app: Application) : AndroidViewModel(app) {
             JSONObject(paramObject.toString()).toString()
         )
         val res = api.logout(body)
-        res.enqueue(object : Callback<LoginResponse> {
-            override fun onResponse(call: Call<LoginResponse>, response: Response<LoginResponse>) {
+        res.enqueue(object : Callback<MyResult<UserResponse>> {
+            override fun onResponse(call: Call<MyResult<UserResponse>>, response: Response<MyResult<UserResponse>>) {
                 if (response.isSuccessful) {
                     val sharedPref = app.getSharedPreferences(
                         app.getString(R.string.shared_file_name), Context.MODE_PRIVATE
@@ -172,7 +168,7 @@ open class BaseViewModel(private val app: Application) : AndroidViewModel(app) {
                 }
             }
 
-            override fun onFailure(call: Call<LoginResponse>, t: Throwable) {
+            override fun onFailure(call: Call<MyResult<UserResponse>>, t: Throwable) {
                 onDone.invoke(false, t.message.toString())
             }
 

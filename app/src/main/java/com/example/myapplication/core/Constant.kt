@@ -1,11 +1,15 @@
 package com.example.myapplication.core
 
 const val APP_NAME = ""
-const val BASE_URL = "http://192.168.1.6:3000"
-const val WS_URL = "ws://192.168.1.6:3000/cable"
+const val BASE_URL = "http://192.168.1.3:3000"
+const val WS_URL = "ws://192.168.1.3:3000/cable"
 
 const val PRODUCT_EXTRA_KEY = "PRODUCT_EXTRA_KEY"
 const val USER_EXTRA_KEY = "USER_EXTRA_KEY"
+
+const val FLAG_UPDATE_ORDER = "FLAG_UPDATE_ORDER"
+const val FLAG_UPDATE_MESSAGE = "FLAG_UPDATE_MESSAGE"
+const val FLAG_NEW_MESSAGE = "FLAG_NEW_MESSAGE"
 
 enum class Role(val title: String, val code: Int) {
     ADMIN("admin", 0),

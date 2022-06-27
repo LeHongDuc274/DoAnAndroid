@@ -37,8 +37,6 @@ class UserFormFragment : BaseDialogFragment(R.layout.fragment_user_form) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-
         initViews()
         initListener()
     }

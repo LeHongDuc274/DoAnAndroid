@@ -1,19 +1,23 @@
 package com.example.myapplication.ui.admin
 
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.core.os.bundleOf
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.myapplication.core.ItemStatus
 import com.example.myapplication.databinding.FragmentOrderManagerBinding
+import com.example.myapplication.databinding.MessageBottomSheetFragmentBinding
 import com.example.myapplication.ext.collectFlow
 import com.example.myapplication.ui.adapter.OrderAdapter
 import com.example.myapplication.ui.adapter.TableOrderAdapter
+import com.example.myapplication.ui.customer.BottomSheetProductsFragment
 import com.example.myapplication.viewmodel.AdminViewModel
 
 
@@ -45,10 +49,16 @@ class OrderManagerFragment : Fragment() {
 
     private fun initListener() {
         collectFlow(adminViewModel.listUser) {
-            adminViewModel.getListTableOrder()
+            if (it.isNotEmpty()) adminViewModel.getListTableOrder()
         }
         collectFlow(adminViewModel.listTableActive) {
-            tableAdapter.setData(it)
+            if (it.isNotEmpty()) {
+                tableAdapter.setData(it)
+                adminViewModel.getListTableMessage()
+            }
+        }
+        collectFlow(adminViewModel.listMessageRequesting) {
+            if (it.isNotEmpty()) tableAdapter.setListMessage(it)
         }
         collectFlow(adminViewModel.listOrderDetailsByTable) {
             orderDetailAdapter.setData(it)
@@ -61,6 +71,13 @@ class OrderManagerFragment : Fragment() {
                     res.data?.order_details ?: mutableListOf()
                 )
             }
+        }
+        tableAdapter.setOnMessageClick {
+            val sheet = BottomSheetMessagesFragment(requireActivity())
+            sheet.arguments = bundleOf(
+                "id" to it.user_id
+            )
+            sheet.show(childFragmentManager, id.toString())
         }
         binding.tvComplete.setOnClickListener {
             // Tạm thời để DELIVERING , làm màn staff xong chuyen lai thanh DELEVERED

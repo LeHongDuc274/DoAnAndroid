@@ -1,26 +1,19 @@
 package com.example.myapplication.viewmodel
 
 import android.app.Application
-import android.util.Log
 import androidx.lifecycle.viewModelScope
 import com.example.myapplication.core.*
 import com.example.myapplication.core.api.OrderService
-import com.example.myapplication.core.api.response.OrderDetailRes
-import com.example.myapplication.core.api.response.OrderResponse
-import com.example.myapplication.core.api.response.SocketResponse
+import com.example.myapplication.core.api.UserService
+import com.example.myapplication.core.api.response.*
 import com.example.myapplication.core.model.Order
 import com.example.myapplication.core.model.OrderDetail
-import com.example.myapplication.core.model.ProductEntity
 import com.example.myapplication.core.utils.GsonUtils
 import com.example.myapplication.ext.UserId
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.WebSocket
-import okhttp3.WebSocketListener
+import okhttp3.*
 import org.json.JSONObject
 import retrofit2.Call
 import retrofit2.Callback
@@ -107,8 +100,8 @@ class CustomerViewModel(private val app: Application) : BaseViewModel(app) {
     fun createOrder(onDone: (Boolean, String, Order?) -> Unit) {
         val api = OrderService.createOrderApi(token)
         val res = api.createOrder(order)
-        res.enqueue(object : Callback<OrderResponse> {
-            override fun onResponse(call: Call<OrderResponse>, response: Response<OrderResponse>) {
+        res.enqueue(object : Callback<MyResult<Order?>> {
+            override fun onResponse(call: Call<MyResult<Order?>>, response: Response<MyResult<Order?>>) {
                 if (response.isSuccessful) {
                     val data = response.body()!!.data!!
                     order = data
@@ -119,7 +112,7 @@ class CustomerViewModel(private val app: Application) : BaseViewModel(app) {
                 }
             }
 
-            override fun onFailure(call: Call<OrderResponse>, t: Throwable) {
+            override fun onFailure(call: Call<MyResult<Order?>>, t: Throwable) {
                 onDone.invoke(false, t.message.toString(), null)
             }
 
@@ -129,10 +122,10 @@ class CustomerViewModel(private val app: Application) : BaseViewModel(app) {
     fun createOrderDetail(detail: OrderDetail, onDone: (Boolean, String, OrderDetail?) -> Unit) {
         val api = OrderService.createOrderApi(token)
         val res = api.createOrderDetails(detail)
-        res.enqueue(object : Callback<OrderDetailRes> {
+        res.enqueue(object : Callback<MyResult<OrderDetail>> {
             override fun onResponse(
-                call: Call<OrderDetailRes>,
-                response: Response<OrderDetailRes>
+                call: Call<MyResult<OrderDetail>>,
+                response: Response<MyResult<OrderDetail>>
             ) {
                 if (response.isSuccessful) {
                     onDone.invoke(true, "Create detail succes", response.body()!!.data)
@@ -141,7 +134,7 @@ class CustomerViewModel(private val app: Application) : BaseViewModel(app) {
                 }
             }
 
-            override fun onFailure(call: Call<OrderDetailRes>, t: Throwable) {
+            override fun onFailure(call: Call<MyResult<OrderDetail>>, t: Throwable) {
                 onDone.invoke(false, t.message.toString(), null)
             }
         })
@@ -155,6 +148,31 @@ class CustomerViewModel(private val app: Application) : BaseViewModel(app) {
             val price = product?.price ?: 0
             detail.amount * price
         }
+    }
+
+    fun createMessageRequest(content: String, onDone: (String) -> Unit) {
+        val api = UserService.createUserApi(token)
+        val paramObject = JSONObject()
+        paramObject.put("content", content)
+        val body: RequestBody = RequestBody.create(
+            MediaType.parse("application/json; charset=utf-8"),
+            JSONObject(paramObject.toString()).toString()
+        )
+        val res = api.createMessage(body)
+        res.enqueue(object : Callback<MyResult<Message>> {
+            override fun onResponse(call: Call<MyResult<Message>>, response: Response<MyResult<Message>>) {
+                if (response.isSuccessful) {
+                    onDone.invoke("requesting")
+                } else {
+                    onDone.invoke("error" + response.code())
+                }
+            }
+
+            override fun onFailure(call: Call<MyResult<Message>>, t: Throwable) {
+                onDone.invoke("errors" + t.message.toString())
+            }
+
+        })
     }
 
 }
