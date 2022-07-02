@@ -28,7 +28,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_horizontal"
-            android:text="empty"
+            android:text="CÒn trống"
             android:textColor="@color/color_red"
             android:textSize="13sp" />
     </LinearLayout>

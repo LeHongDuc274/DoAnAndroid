@@ -23,6 +23,7 @@ class OrderDetailKitchenAdapter : RecyclerView.Adapter<OrderDetailKitchenAdapter
                 binding.tvName.text = it.name
             }
             binding.tvUserName.text = orderDetail.user_display_name
+            binding.tvTime.text = orderDetail.created_at
         }
     }
 

@@ -1,11 +1,14 @@
 package com.example.myapplication.ui.customer
 
+import android.content.DialogInterface
 import android.graphics.Color
 import android.graphics.PorterDuff
 import android.os.Bundle
+import android.util.Log
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.core.os.bundleOf
 import androidx.core.view.GravityCompat
 import androidx.lifecycle.ViewModelProvider
@@ -47,7 +50,7 @@ class CustomerActivity : BaseActivity() {
         viewmodel.initViewModel()
         collectFlow(viewmodel.listProducts) {
             viewmodel.setListProductByCategory()
-            if (it.isNotEmpty()) {
+            if (it.isNotEmpty() && !viewmodel.connection) {
                 viewmodel.initSocket { orderGone ->
                     binding.tvBooking.visibility = if (orderGone) GONE else VISIBLE
                     binding.tvBooking.isClickable = true
@@ -65,11 +68,20 @@ class CustomerActivity : BaseActivity() {
         collectFlow(viewmodel.listCategories) {
             categoryAdapter.setData(it)
         }
+        collectFlow(viewmodel.arletMessage) {
+            if (it.isNotBlank()) {
+                AlertDialog.Builder(this)
+                    .setTitle("Đơn hàng bạn gặp sự cố")
+                    .setMessage("Sản phẩm $it đã được xoá khỏi đơn hàng")
+                    .setPositiveButton("Yes", DialogInterface.OnClickListener { dialog, which -> })
+                    .setNegativeButton("", null).show()
+            }
+        }
     }
 
     private fun initOnClick() {
         productAdapter.setOnClick {
-            showBottomSheetDialog(it.id)
+            if (it.status == 0) showBottomSheetDialog(it.id) else showToast("Món ăn này đã hết")
         }
         categoryAdapter.setOnClickItem {
             viewmodel.setListProductByCategory(it.id)
@@ -80,7 +92,7 @@ class CustomerActivity : BaseActivity() {
             }
             orderDetail?.apply {
                 amount = 0
-                note = "Note..."
+                note = "Ghi chú ..."
             }
             // call API delete this order Detail
             // viewmodel.setListOrder(list)
@@ -105,7 +117,7 @@ class CustomerActivity : BaseActivity() {
                         }
                     }
                 } else {
-                    Toast.makeText(this, "Password is blank", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "Mật khẩu trống", Toast.LENGTH_SHORT).show()
                 }
             }
             false
@@ -115,7 +127,7 @@ class CustomerActivity : BaseActivity() {
         binding.tvBooking.setOnClickListener {
             when {
                 viewmodel.listOrderDetails.value.isEmpty() -> { // list empty
-                    showToast("Cart Empty")
+                    showToast("Đơn hàng không thể trống")
                 }
                 viewmodel.order.id == -1 && viewmodel.order.user_id == -1 -> { // order = empty -> create order
                     viewmodel.order.order_details.apply {
@@ -137,7 +149,7 @@ class CustomerActivity : BaseActivity() {
         }
         binding.ivRequestStaff.setOnClickListener {
             showDialogResquestStaff { content ->
-                viewmodel.createMessageRequest(content){
+                viewmodel.createMessageRequest(content) {
                     showToast(it)
                 }
             }
@@ -192,5 +204,6 @@ class CustomerActivity : BaseActivity() {
     override fun onDestroy() {
         super.onDestroy()
         viewmodel.finalizeSocket()
+        viewmodel.arletMessage.value = ""
     }
 }

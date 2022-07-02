@@ -1,6 +1,8 @@
 package com.example.myapplication.viewmodel
 
 import android.app.Application
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.lifecycle.viewModelScope
 import com.example.myapplication.core.*
 import com.example.myapplication.core.api.OrderService
@@ -8,6 +10,7 @@ import com.example.myapplication.core.api.UserService
 import com.example.myapplication.core.api.response.*
 import com.example.myapplication.core.model.Order
 import com.example.myapplication.core.model.OrderDetail
+import com.example.myapplication.core.model.ProductEntity
 import com.example.myapplication.core.utils.GsonUtils
 import com.example.myapplication.ext.UserId
 import kotlinx.coroutines.delay
@@ -18,15 +21,16 @@ import org.json.JSONObject
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import java.lang.Exception
 
 class CustomerViewModel(private val app: Application) : BaseViewModel(app) {
 
-    val listOrderDetails = MutableStateFlow<List<OrderDetail>>(listOf())
+    val listOrderDetails = MutableStateFlow<MutableList<OrderDetail>>(mutableListOf())
     var order: Order = Order()
     private var client = OkHttpClient()
-    private var ws: WebSocket? = null
+    var ws: WebSocket? = null
     private var request: Request? = null
-    private var connection = false
+    val arletMessage = MutableStateFlow("")
     var orderChannelIdent =
         String.format("{\"channel\":\"OrderChannel\", \"user_id\": \"%d\"}", app.UserId())
 
@@ -39,12 +43,17 @@ class CustomerViewModel(private val app: Application) : BaseViewModel(app) {
                 val param = JSONObject()
                 param.put(COMMAND, SUBSCRIBE)
                 param.put(IDENTIFIER, orderChannelIdent)
+                val param2 = JSONObject()
+                param2.put(COMMAND, SUBSCRIBE)
+                param2.put(IDENTIFIER, Channel.PRODUCT_CHANNEL.channel)
                 ws?.send(param.toString())
+                ws?.send(param2.toString())
                 connection = true
             }
 
+            @RequiresApi(Build.VERSION_CODES.N)
             override fun onMessage(webSocket: WebSocket, text: String) {
-                val res = GsonUtils.getGsonParser().fromJson(text, SocketResponse::class.java)
+                val res = GsonUtils.getGsonParser().fromJson(text, SocketMessage::class.java)
                 when (res.identifier) {
                     orderChannelIdent -> {
                         getCurrentOrder(app.UserId()) { b, str, response ->
@@ -53,13 +62,32 @@ class CustomerViewModel(private val app: Application) : BaseViewModel(app) {
                                 setListOrder(response.data?.order_details ?: mutableListOf())
                                 onOrderDone.invoke(order.id != -1)
                             }
-//                            }
                         }
                     }
                     Channel.PRODUCT_CHANNEL.channel -> {
-                        //reload product
+                        try {
+                            val productEntity =
+                                GsonUtils.getGsonParser()
+                                    .fromJson(res.message, ProductEntity::class.java)
+                            if (productEntity == null) return
+                            if (productEntity.status == 1) checkValidProductInCart(productEntity)
+                            val raw_image = productEntity.image_url
+                            val url = BASE_URL + raw_image.splitToSequence("?").first()
+                            productEntity.image_url = url
+                            val index = listProducts.value.indexOfLast {
+                                it.id == productEntity.id
+                            }
+                            if (index != -1) {
+                                val list = mutableListOf<ProductEntity>()
+                                list.addAll(listProducts.value)
+                                list.removeAt(index)
+                                list.add(index, productEntity)
+                                listProducts.value = list
+                            }
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                        }
                     }
-
                 }
             }
 
@@ -84,6 +112,33 @@ class CustomerViewModel(private val app: Application) : BaseViewModel(app) {
         })
     }
 
+    private fun checkValidProductInCart(productEntity: ProductEntity) {
+        val index = listOrderDetails.value.indexOfLast {
+            it.product_id == productEntity.id
+        }
+        if (index != -1) {
+            val detail = listOrderDetails.value.get(index)
+            when {
+                (detail.id != -1 && detail.status < 1) -> {
+                    deleteOrderDetails(detail.id)
+                    arletMessage.value = listProducts.value.findLast {
+                        productEntity.id == it.id
+                    }?.name ?: ""
+                }
+                (detail.id == -1) -> {
+                    val list = mutableListOf<OrderDetail>().apply {
+                        addAll(listOrderDetails.value)
+                        removeAt(index)
+                    }
+                    listOrderDetails.value = list
+                    arletMessage.value = listProducts.value.findLast {
+                        productEntity.id == it.id
+                    }?.name ?: ""
+                }
+            }
+        }
+    }
+
     fun finalizeSocket() {
         ws?.send("finishing")
         ws?.close(1001, null)
@@ -97,29 +152,52 @@ class CustomerViewModel(private val app: Application) : BaseViewModel(app) {
         }
     }
 
-    fun createOrder(onDone: (Boolean, String, Order?) -> Unit) {
+    fun deleteOrderDetails(id: Int) {
         val api = OrderService.createOrderApi(token)
-        val res = api.createOrder(order)
-        res.enqueue(object : Callback<MyResult<Order?>> {
-            override fun onResponse(call: Call<MyResult<Order?>>, response: Response<MyResult<Order?>>) {
-                if (response.isSuccessful) {
-                    val data = response.body()!!.data!!
-                    order = data
-                    listOrderDetails.value = data.order_details
-                    onDone.invoke(true, "Succes", data)
-                } else {
-                    onDone.invoke(false, response.code().toString(), null)
-                }
+        val res = api.deleteOrderDetails(id)
+        res.enqueue(object : Callback<MyResult<String>> {
+            override fun onResponse(
+                call: Call<MyResult<String>>,
+                response: Response<MyResult<String>>
+            ) {
+
             }
 
-            override fun onFailure(call: Call<MyResult<Order?>>, t: Throwable) {
-                onDone.invoke(false, t.message.toString(), null)
+            override fun onFailure(call: Call<MyResult<String>>, t: Throwable) {
             }
 
         })
     }
 
-    fun createOrderDetail(detail: OrderDetail, onDone: (Boolean, String, OrderDetail?) -> Unit) {
+    fun createOrder(onDone: (Boolean, String, Order?) -> Unit) {
+        val api = OrderService.createOrderApi(token)
+        val res = api.createOrder(order)
+        res.enqueue(object : Callback<MyResult<Order?>> {
+            override fun onResponse(
+                call: Call<MyResult<Order?>>,
+                response: Response<MyResult<Order?>>
+            ) {
+                if (response.isSuccessful) {
+                    val data = response.body()!!.data!!
+                    order = data
+                    listOrderDetails.value = data.order_details
+                    onDone.invoke(true, "Thành công", null)
+                } else {
+                    onDone.invoke(false, "Thất bại , thử lại sau", null)
+                }
+            }
+
+            override fun onFailure(call: Call<MyResult<Order?>>, t: Throwable) {
+                onDone.invoke(false, "Thất bại , thử lại sau", null)
+            }
+
+        })
+    }
+
+    fun createOrderDetail(
+        detail: OrderDetail,
+        onDone: (Boolean, String, OrderDetail?) -> Unit
+    ) {
         val api = OrderService.createOrderApi(token)
         val res = api.createOrderDetails(detail)
         res.enqueue(object : Callback<MyResult<OrderDetail>> {
@@ -128,14 +206,14 @@ class CustomerViewModel(private val app: Application) : BaseViewModel(app) {
                 response: Response<MyResult<OrderDetail>>
             ) {
                 if (response.isSuccessful) {
-                    onDone.invoke(true, "Create detail succes", response.body()!!.data)
+                    onDone.invoke(true, "Thành công", response.body()!!.data)
                 } else {
-                    onDone.invoke(false, response.code().toString(), null)
+                    onDone.invoke(false, "Thất bại , thử lại sau", null)
                 }
             }
 
             override fun onFailure(call: Call<MyResult<OrderDetail>>, t: Throwable) {
-                onDone.invoke(false, t.message.toString(), null)
+                onDone.invoke(false, "Thất bại , thử lại sau", null)
             }
         })
     }
@@ -160,16 +238,19 @@ class CustomerViewModel(private val app: Application) : BaseViewModel(app) {
         )
         val res = api.createMessage(body)
         res.enqueue(object : Callback<MyResult<Message>> {
-            override fun onResponse(call: Call<MyResult<Message>>, response: Response<MyResult<Message>>) {
+            override fun onResponse(
+                call: Call<MyResult<Message>>,
+                response: Response<MyResult<Message>>
+            ) {
                 if (response.isSuccessful) {
-                    onDone.invoke("requesting")
+                    onDone.invoke("Đang xử lí")
                 } else {
-                    onDone.invoke("error" + response.code())
+                    onDone.invoke("Thất bại , thử lại sau")
                 }
             }
 
             override fun onFailure(call: Call<MyResult<Message>>, t: Throwable) {
-                onDone.invoke("errors" + t.message.toString())
+                onDone.invoke("Thất bại , thử lại sau")
             }
 
         })

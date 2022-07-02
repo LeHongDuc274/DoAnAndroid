@@ -70,7 +70,7 @@ class AdminActivity : BaseActivity() {
                         }
                     }
                 } else {
-                    showToast("Paswword is Blank")
+                    showToast("Mật khẩu hoặc tên đăng nhập sai")
                 }
             }
         }

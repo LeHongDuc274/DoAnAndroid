@@ -10,7 +10,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:text="Message"
+        android:text="Yêu cầu từ khách hàng"
         android:textColor="@color/color_red"
         android:textSize="15sp"
         android:textStyle="bold" />

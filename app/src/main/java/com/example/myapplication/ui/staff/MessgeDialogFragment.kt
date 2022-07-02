@@ -59,6 +59,8 @@ class MessgeDialogFragment : BaseDialogFragment(R.layout.message_bottom_sheet_fr
             adapter = messageAdapter
             layoutManager = LinearLayoutManager(activity)
         }
+        messageAdapter.setCallback {
+            kitchenVM.doRequest(it)
+        }
     }
-
 }

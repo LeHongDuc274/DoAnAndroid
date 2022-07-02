@@ -12,6 +12,7 @@ import com.bumptech.glide.load.resource.bitmap.CircleCrop
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.example.myapplication.core.model.ProductEntity
 import com.example.myapplication.databinding.ProductManagerItemBinding
+import com.example.myapplication.ext.formatWithCurrency
 
 class ProductManagerAdapter : RecyclerView.Adapter<ProductManagerAdapter.ViewHolder>() {
     private var listProduct = mutableListOf<ProductEntity>()
@@ -35,8 +36,10 @@ class ProductManagerAdapter : RecyclerView.Adapter<ProductManagerAdapter.ViewHol
                 binding.tvStatus.visibility = View.VISIBLE
                 binding.tvEdit.visibility = View.VISIBLE
                 binding.tvNew.visibility = View.INVISIBLE
-                binding.tvName.text = listProduct[layoutPosition].name
-                binding.tvPrice.text = listProduct[layoutPosition].price.toString() + " vnđ"
+                val product = listProduct[layoutPosition]
+                binding.tvName.text = product.name
+                binding.tvPrice.text = product.price.formatWithCurrency()
+                binding.tvStatus.text = if (product.status == 0 ) "Khả dụng" else "Hết hàng"
                 val url = listProduct[layoutPosition].image_url
                 Glide.with(binding.ivProduct.context).load(url).circleCrop().into(binding.ivProduct)
             }

@@ -25,7 +25,6 @@ class TableOrderAdapter : RecyclerView.Adapter<TableOrderAdapter.ViewHolder>() {
             val hasMessage = listMessage.any {
                 it.user_id == table.user_id
             }
-            Log.e("tagXX",hasMessage.toString())
             if (hasMessage) {
                 binding.ivMessage.visibility = View.VISIBLE
                 binding.ivMessage.setColorFilter(
@@ -37,9 +36,9 @@ class TableOrderAdapter : RecyclerView.Adapter<TableOrderAdapter.ViewHolder>() {
             }
             val order = table.order
             if (order == null || order.status == 1) {
-                binding.tvState.text = "Empty"
+                binding.tvState.text = "Còn trống"
             } else {
-                binding.tvState.text = "Using"
+                binding.tvState.text = "Đang sử dụng"
             }
         }
     }
@@ -78,7 +77,6 @@ class TableOrderAdapter : RecyclerView.Adapter<TableOrderAdapter.ViewHolder>() {
     }
 
     fun setListMessage(list: MutableList<Message>) {
-        Log.e("tagXXX",list.toString())
         listMessage.clear()
         listMessage.addAll(list)
         notifyDataSetChanged()

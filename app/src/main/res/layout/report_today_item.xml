@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/back_ground_item_no_stroke"
+    android:padding="8dp">
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/cv_icon"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        app:cardCornerRadius="12dp"
+        app:cardBackgroundColor="@color/color_background_item"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:id="@+id/iv_icon"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="6dp"
+            android:background="@color/color_background_grey"
+            android:src="@drawable/outline_currency_exchange_24" />
+    </com.google.android.material.card.MaterialCardView>
+
+    <TextView
+        android:id="@+id/tv_change_percent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="8dp"
+        android:text="123 %"
+        android:textColor="@color/white_1"
+        android:textSize="12sp"
+        app:layout_constraintBottom_toBottomOf="@id/cv_icon"
+        app:layout_constraintStart_toEndOf="@id/cv_icon"
+        app:layout_constraintTop_toTopOf="@id/cv_icon" />
+
+    <TextView
+        android:id="@+id/tv_total"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="12321321"
+        android:textColor="@color/white"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@id/cv_icon"
+        app:layout_constraintTop_toBottomOf="@id/cv_icon" />
+
+    <TextView
+        android:id="@+id/tv_label"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Total Revenue"
+        android:textColor="@color/white"
+        android:textSize="16sp"
+        android:textStyle="italic"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@id/cv_icon"
+        app:layout_constraintTop_toBottomOf="@id/tv_total" />
+</androidx.constraintlayout.widget.ConstraintLayout>

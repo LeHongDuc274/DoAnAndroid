@@ -47,4 +47,8 @@ class MessagesAdapter() : RecyclerView.Adapter<MessagesAdapter.ViewHolder>() {
         listMessage.addAll(list)
         notifyDataSetChanged()
     }
+
+    fun setCallback(listener: (Message) -> Unit){
+        callback = listener
+    }
 }

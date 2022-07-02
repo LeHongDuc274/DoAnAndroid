@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.myapplication.core.model.ProductEntity
 import com.example.myapplication.databinding.ProductItemBinding
+import com.example.myapplication.ext.formatWithCurrency
 
 class ProductsAdapter() : RecyclerView.Adapter<ProductsAdapter.ViewHolder>() {
     private var callback: ((ProductEntity) -> Unit)? = null
@@ -18,7 +19,7 @@ class ProductsAdapter() : RecyclerView.Adapter<ProductsAdapter.ViewHolder>() {
 
         fun onBind(position: Int) {
             binding.tvName.text = listProduct[layoutPosition].name
-            binding.tvPrice.text = listProduct[layoutPosition].price.toString() + " vnđ"
+            binding.tvPrice.text = listProduct[layoutPosition].price.formatWithCurrency()
 
             if (listProduct[layoutPosition].status != 0) {
                 binding.ivStatus.visibility = View.VISIBLE

@@ -17,6 +17,7 @@ import com.example.myapplication.core.utils.RealPathUtil
 import com.example.myapplication.ext.UserId
 import com.example.myapplication.ext.createRequestBody
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import okhttp3.*
@@ -35,6 +36,12 @@ class AdminViewModel(private val app: Application) : BaseViewModel(app) {
     val listTableActive = MutableStateFlow<MutableList<TableOrdering>>(mutableListOf())
     val listOrderDetailsByTable = MutableStateFlow<MutableList<OrderDetail>>(mutableListOf())
     val listMessageRequesting = MutableStateFlow<MutableList<Message>>(mutableListOf())
+    val reportToday = MutableSharedFlow<ReportToday>()
+    val revenueLastWeek = MutableStateFlow<MutableList<RevenueReport>>(mutableListOf())
+    val revenueAllTime = MutableStateFlow<MutableList<RevenueReport>>(mutableListOf())
+    val productReport = MutableStateFlow<MutableList<ProductReport>>(mutableListOf())
+    val productReportByCategory = MutableStateFlow<MutableList<ProductReport>>(mutableListOf())
+    var categoryIdReport = 0
     var roleSelected = Role.TABLE.code
     var tableIdSubscribe = app.UserId()
     val orderChannelSubscribe get() = String.format(ORDER_CHANNEL_FORMAT, tableIdSubscribe)
@@ -43,7 +50,6 @@ class AdminViewModel(private val app: Application) : BaseViewModel(app) {
     private var client = OkHttpClient()
     private var ws: WebSocket? = null
     lateinit var request: Request
-    private var connecting = false
 
     override fun initViewModel() {
         super.initViewModel()
@@ -56,7 +62,6 @@ class AdminViewModel(private val app: Application) : BaseViewModel(app) {
     }
 
     fun subscribeChannel(userId: Int) {
-
         tableIdSubscribe = userId
         val param = JSONObject()
         param.put(COMMAND, SUBSCRIBE)
@@ -74,14 +79,15 @@ class AdminViewModel(private val app: Application) : BaseViewModel(app) {
                 param.put(COMMAND, SUBSCRIBE)
                 param.put(IDENTIFIER, Channel.MESSAGE_CHANNEL.channel)
                 ws?.send(param.toString())
-                connecting = true
+                subscribeChannel(tableIdSubscribe)
+                connection = true
             }
 
             override fun onMessage(webSocket: WebSocket, text: String) {
-                val res = GsonUtils.getGsonParser().fromJson(text, SocketResponse::class.java)
-                Log.e("tagAdmin", text.toString())
+                val res = GsonUtils.getGsonParser().fromJson(text, SocketMessage::class.java)
+                Log.e("TagMessageAdmin", text)
                 when {
-                    res.identifier == orderChannelSubscribe -> {
+                    res.identifier == orderChannelSubscribe && res.message == tableIdSubscribe.toString() -> {
                         getCurrentOrder(tableIdSubscribe) { b, mess, res ->
                             if (b && res != null) setListOrderDetailsByTable(
                                 res.data?.order_details ?: mutableListOf()
@@ -93,7 +99,6 @@ class AdminViewModel(private val app: Application) : BaseViewModel(app) {
                     }
 
                     res.identifier == Channel.MESSAGE_CHANNEL.channel && res.message == FLAG_UPDATE_MESSAGE -> {
-                        Log.e("tagmess", FLAG_UPDATE_MESSAGE)
                         getListTableMessage()
                     }
                 }
@@ -104,20 +109,18 @@ class AdminViewModel(private val app: Application) : BaseViewModel(app) {
                 t: Throwable,
                 response: okhttp3.Response?
             ) {
-                Log.e("tagXFail", t.toString())
-                connecting = false
+                connection = false
                 client.dispatcher().cancelAll()
                 viewModelScope.launch {
                     delay(2000)
-                    if (!connecting) {
+                    if (!connection) {
                         initSocket()
                     }
                 }
             }
 
             override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
-                Log.e("tagX", reason.toString())
-                connecting = false
+                connection = false
                 client.dispatcher().cancelAll()
             }
 
@@ -171,7 +174,7 @@ class AdminViewModel(private val app: Application) : BaseViewModel(app) {
                 if (response.isSuccessful) {
                     onDone.invoke(true, "", response.body()!!.data)
                 } else {
-                    onDone.invoke(false, "not ok", null)
+                    onDone.invoke(false, "có lỗi xảy ra , thử lại sau", null)
                 }
             }
 
@@ -229,7 +232,7 @@ class AdminViewModel(private val app: Application) : BaseViewModel(app) {
                 if (response.isSuccessful) {
                     onDone.invoke(true, "", response.body()!!.data)
                 } else {
-                    onDone.invoke(false, "not ok", null)
+                    onDone.invoke(false, "có lỗi xảy ra , thử lại sau", null)
                 }
             }
 
@@ -281,14 +284,14 @@ class AdminViewModel(private val app: Application) : BaseViewModel(app) {
                 response: Response<MyResult<CategoryEntity>>
             ) {
                 if (response.isSuccessful) {
-                    onDone.invoke(true, "Add succes", response.body()!!.data)
+                    onDone.invoke(true, "Thành công", response.body()!!.data)
                 } else {
-                    onDone.invoke(false, response.code().toString(), null)
+                    onDone.invoke(false, "Thất bại , thử lại sau", null)
                 }
             }
 
             override fun onFailure(call: Call<MyResult<CategoryEntity>>, t: Throwable) {
-                onDone.invoke(false, t.message.toString(), null)
+                onDone.invoke(false, "Thất bại , thử lại sau", null)
             }
 
         })
@@ -329,14 +332,14 @@ class AdminViewModel(private val app: Application) : BaseViewModel(app) {
                     list.addAll(listUser.value)
                     listUser.value = list
                     getListUserByRole(roleSelected)
-                    onDone.invoke(true, "Create Sucess", response.body()!!.data)
+                    onDone.invoke(true, "Thành công", response.body()!!.data)
                 } else {
-                    onDone.invoke(false, response.code().toString(), null)
+                    onDone.invoke(false, "Thất bại , thử lại sau", null)
                 }
             }
 
             override fun onFailure(call: Call<MyResult<User>>, t: Throwable) {
-                onDone.invoke(false, t.message.toString(), null)
+                onDone.invoke(false,"Thất bại , thử lại sau", null)
             }
         })
     }
@@ -367,14 +370,14 @@ class AdminViewModel(private val app: Application) : BaseViewModel(app) {
                     list.set(index, user)
                     listUser.value = list
                     getListUserByRole(roleSelected)
-                    onDone.invoke(true, "Edit Sucess", response.body()!!.data)
+                    onDone.invoke(true, "Thành công", response.body()!!.data)
                 } else {
-                    onDone.invoke(false, response.code().toString(), null)
+                    onDone.invoke(false, "Thất bại , thử lại sau", null)
                 }
             }
 
             override fun onFailure(call: Call<MyResult<User>>, t: Throwable) {
-                onDone.invoke(false, t.message.toString(), null)
+                onDone.invoke(false, "Thất bại , thử lại sau", null)
             }
         })
     }
@@ -390,6 +393,7 @@ class AdminViewModel(private val app: Application) : BaseViewModel(app) {
                 if (response.isSuccessful) {
                     val list = response.body()!!.data
                     listTableActive.value = list
+
                 } else {
 
                 }
@@ -429,7 +433,8 @@ class AdminViewModel(private val app: Application) : BaseViewModel(app) {
 
     fun completeOrder() {
         val api = OrderService.createOrderApi(token)
-        val res = api.completeOrder(tableIdSubscribe)
+        val total_price = listOrderDetailsByTable.value.sumOf { it.total_price }
+        val res = api.completeOrder(tableIdSubscribe ,total_price)
         res.enqueue(object : Callback<MyResult<Order?>> {
             override fun onResponse(
                 call: Call<MyResult<Order?>>,
@@ -446,5 +451,109 @@ class AdminViewModel(private val app: Application) : BaseViewModel(app) {
 
             }
         })
+    }
+
+    fun getReportToday() {
+        val api = OrderService.createOrderApi(token)
+        val res = api.getReportToday()
+        res.enqueue(object : Callback<MyResult<ReportToday>> {
+            override fun onResponse(
+                call: Call<MyResult<ReportToday>>,
+                response: Response<MyResult<ReportToday>>
+            ) {
+                if (response.isSuccessful) {
+                    viewModelScope.launch {
+                        reportToday.emit(response.body()!!.data)
+                    }
+                } else {
+
+                }
+            }
+
+            override fun onFailure(call: Call<MyResult<ReportToday>>, t: Throwable) {
+
+            }
+
+        })
+    }
+
+    fun getRevenueLastWeek() {
+        val api = OrderService.createOrderApi(token)
+        val res = api.getRevenueLastWeek()
+        res.enqueue(object : Callback<MyResult<List<RevenueReport>>> {
+            override fun onResponse(
+                call: Call<MyResult<List<RevenueReport>>>,
+                response: Response<MyResult<List<RevenueReport>>>
+            ) {
+                if (response.isSuccessful) {
+                    revenueLastWeek.value = mutableListOf()
+                    revenueLastWeek.value = response.body()!!.data.toMutableList()
+                } else {
+
+                }
+            }
+
+            override fun onFailure(call: Call<MyResult<List<RevenueReport>>>, t: Throwable) {
+
+            }
+
+        })
+    }
+
+    fun getRevenueAllTime() {
+        val api = OrderService.createOrderApi(token)
+        val res = api.getRevenueAllTime()
+        res.enqueue(object : Callback<MyResult<List<RevenueReport>>> {
+            override fun onResponse(
+                call: Call<MyResult<List<RevenueReport>>>,
+                response: Response<MyResult<List<RevenueReport>>>
+            ) {
+                if (response.isSuccessful) {
+                    revenueAllTime.value = mutableListOf()
+                    revenueAllTime.value = response.body()!!.data.toMutableList()
+                } else {
+
+                }
+            }
+
+            override fun onFailure(call: Call<MyResult<List<RevenueReport>>>, t: Throwable) {
+
+            }
+        })
+    }
+
+    fun getReportProduct(type: Int) {
+        val api = OrderService.createOrderApi(token)
+        val res = api.getProductReport(type)
+        res.enqueue(object : Callback<MyResult<List<ProductReport>>> {
+            override fun onResponse(
+                call: Call<MyResult<List<ProductReport>>>,
+                response: Response<MyResult<List<ProductReport>>>
+            ) {
+                if (response.isSuccessful) {
+                    productReport.value = mutableListOf()
+                    productReport.value = response.body()!!.data.toMutableList()
+                    filterProductReportByCategory(categoryIdReport)
+                } else {
+
+                }
+            }
+
+            override fun onFailure(call: Call<MyResult<List<ProductReport>>>, t: Throwable) {
+
+            }
+
+        })
+    }
+
+    fun filterProductReportByCategory(productId: Int) {
+        categoryIdReport = productId
+        if (productId == 0) {
+            productReportByCategory.value = productReport.value
+        } else {
+            productReportByCategory.value = productReport.value.filter {
+                it.category_id == categoryIdReport
+            }.toMutableList()
+        }
     }
 }

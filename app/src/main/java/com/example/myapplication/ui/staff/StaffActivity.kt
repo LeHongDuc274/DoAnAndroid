@@ -16,6 +16,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.myapplication.BaseActivity
 import com.example.myapplication.MyApp
 import com.example.myapplication.R
 import com.example.myapplication.core.model.OrderDetail
@@ -27,7 +28,7 @@ import com.example.myapplication.ext.showToast
 import com.example.myapplication.ui.adapter.OrderDetailKitchenAdapter
 import com.example.myapplication.viewmodel.KitchenViewModel
 
-class StaffActivity : AppCompatActivity() {
+class StaffActivity : BaseActivity() {
     private lateinit var binding: ActivityStaffBinding
     private val deliveringAdapter = OrderDetailKitchenAdapter()
     private val completedAdapter = OrderDetailKitchenAdapter()
@@ -55,17 +56,16 @@ class StaffActivity : AppCompatActivity() {
         }
         kitchenVM.getListTableMessage()
         collectFlow(kitchenVM.listProducts) {
-            if (it.isNotEmpty()) {
-                kitchenVM.initSocket {
-                    val alarmSound =
-                        RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+            if (it.isNotEmpty() && !kitchenVM.connection) {
+                kitchenVM.initSocket()
+                kitchenVM.onShowNotice =  { mess ->
                     val builder: NotificationCompat.Builder = NotificationCompat.Builder(
                         this,
                         MyApp.CHANNEL_ID
                     )
                     builder.apply {
-                        setContentTitle("Thong bao")
-                        setContentText("thong bao")
+                        setContentTitle("Yêu cầu mới từ ${mess.user_name} ${mess.created_at}")
+                        setContentText("Nội dung : ${mess.content} ")
                         setSmallIcon(R.drawable.ic_icons8_menu)
                         setPriority(NotificationCompat.PRIORITY_MAX)
                         setDefaults(NotificationCompat.DEFAULT_ALL)
@@ -99,7 +99,7 @@ class StaffActivity : AppCompatActivity() {
                         }
                     }
                 } else {
-                    showToast("Paswword is Blank")
+                    showToast("Mật khẩu trống")
                 }
             }
         }

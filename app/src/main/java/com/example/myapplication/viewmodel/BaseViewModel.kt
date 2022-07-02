@@ -30,6 +30,7 @@ open class BaseViewModel(private val app: Application) : AndroidViewModel(app) {
     var token = ""
     val listCategories = MutableStateFlow<MutableList<CategoryEntity>>(mutableListOf())
     val listProducts = MutableStateFlow<MutableList<ProductEntity>>(mutableListOf())
+    var connection = false
     var categorySelected = -1
     val listProductFilter =
         MutableStateFlow<MutableList<ProductEntity>>(mutableListOf())
@@ -61,7 +62,10 @@ open class BaseViewModel(private val app: Application) : AndroidViewModel(app) {
         })
 
         productApi.getListProduct().enqueue(object : Callback<MyResult<List<ProductEntity>>> {
-            override fun onResponse(call: Call<MyResult<List<ProductEntity>>>, response: Response<MyResult<List<ProductEntity>>>) {
+            override fun onResponse(
+                call: Call<MyResult<List<ProductEntity>>>,
+                response: Response<MyResult<List<ProductEntity>>>
+            ) {
                 if (response.isSuccessful) {
                     val listdata = response.body()!!.data.toMutableList()
                     viewModelScope.launch {
@@ -69,6 +73,7 @@ open class BaseViewModel(private val app: Application) : AndroidViewModel(app) {
                         setListProductByCategory(categorySelected)
                     }
                 } else {
+
                 }
             }
 
@@ -86,14 +91,14 @@ open class BaseViewModel(private val app: Application) : AndroidViewModel(app) {
                 response: Response<MyResult<OrderDetail>>
             ) {
                 if (response.isSuccessful) {
-                    onDone.invoke(true, "Update Order detail succes", response.body()!!.data)
+                    onDone.invoke(true, "Thành công", response.body()!!.data)
                 } else {
-                    onDone.invoke(false, response.code().toString(), null)
+                    onDone.invoke(false, "Thất bại , thử lại sau", null)
                 }
             }
 
             override fun onFailure(call: Call<MyResult<OrderDetail>>, t: Throwable) {
-                onDone.invoke(false, t.message.toString(), null)
+                onDone.invoke(false, "Thất bại , thử lại sau", null)
             }
         })
     }
@@ -118,7 +123,10 @@ open class BaseViewModel(private val app: Application) : AndroidViewModel(app) {
         val api = OrderService.createOrderApi(token)
         val res = api.getCurrentOrder(id)
         res.enqueue(object : Callback<MyResult<Order?>> {
-            override fun onResponse(call: Call<MyResult<Order?>>, response: Response<MyResult<Order?>>) {
+            override fun onResponse(
+                call: Call<MyResult<Order?>>,
+                response: Response<MyResult<Order?>>
+            ) {
                 if (response.isSuccessful) {
                     onDone.invoke(true, "", response.body())
                 } else {
@@ -144,7 +152,10 @@ open class BaseViewModel(private val app: Application) : AndroidViewModel(app) {
         )
         val res = api.logout(body)
         res.enqueue(object : Callback<MyResult<UserResponse>> {
-            override fun onResponse(call: Call<MyResult<UserResponse>>, response: Response<MyResult<UserResponse>>) {
+            override fun onResponse(
+                call: Call<MyResult<UserResponse>>,
+                response: Response<MyResult<UserResponse>>
+            ) {
                 if (response.isSuccessful) {
                     val sharedPref = app.getSharedPreferences(
                         app.getString(R.string.shared_file_name), Context.MODE_PRIVATE

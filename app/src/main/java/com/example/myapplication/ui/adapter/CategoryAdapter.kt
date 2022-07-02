@@ -14,7 +14,7 @@ class CategoryAdapter : RecyclerView.Adapter<CategoryAdapter.ViewHolder>() {
         RecyclerView.ViewHolder(binding.root) {
         fun onBind() {
             val category = listCategories[layoutPosition]
-            binding.tvCategory.text = category.name_type.toString()
+            binding.tvCategory.text = category.name_type
         }
     }
 

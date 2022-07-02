@@ -93,7 +93,7 @@ class ProductFormFragment : BaseDialogFragment(R.layout.fragment_product_form) {
             binding.edtPrice.setText(it.price.toString())
             binding.edtContent.setText(it.content)
             binding.swStatus.isChecked = it.status.toString() == "0"
-            binding.tvEdit.text = "Edit"
+            binding.tvEdit.text = "Sửa"
             val url = it.image_url
             Glide.with(binding.ivProduct.context).load(url).circleCrop().into(binding.ivProduct)
         }
@@ -108,7 +108,7 @@ class ProductFormFragment : BaseDialogFragment(R.layout.fragment_product_form) {
         val status = if (binding.swStatus.isChecked) "0" else "1"
         if (mode == NEW_MODE) {
             if (category_id.isBlank() || name.isBlank() || price.isBlank() || content.isBlank() || status.isBlank() || uri == null) {
-                Toast.makeText(requireActivity(), "Value cann't blank", Toast.LENGTH_LONG).show()
+                Toast.makeText(requireActivity(), "Nhập các trường bắt buộc", Toast.LENGTH_LONG).show()
             } else {
                 adminVM.createProduct(
                     category_id,
@@ -119,7 +119,7 @@ class ProductFormFragment : BaseDialogFragment(R.layout.fragment_product_form) {
                     uri!!
                 ) { b, str, pr ->
                     if (b) {
-                        Toast.makeText(requireActivity(), "Add succes", Toast.LENGTH_LONG).show()
+                        Toast.makeText(requireActivity(), "Thành công", Toast.LENGTH_LONG).show()
                         dismiss()
                         GlobalScope.launch {
 
@@ -137,7 +137,7 @@ class ProductFormFragment : BaseDialogFragment(R.layout.fragment_product_form) {
             }
         } else {
             if (category_id.isBlank() || name.isBlank() || price.isBlank() || content.isBlank() || status.isBlank()) {
-                Toast.makeText(requireActivity(), "Value cann't blank", Toast.LENGTH_LONG).show()
+                Toast.makeText(requireActivity(), "Nhập các trường bắt buộc", Toast.LENGTH_LONG).show()
             } else {
                 adminVM.editProduct(
                     product!!.id.toString(),
@@ -149,7 +149,7 @@ class ProductFormFragment : BaseDialogFragment(R.layout.fragment_product_form) {
                     uri
                 ) { b, str, pr ->
                     if (b) {
-                        Toast.makeText(requireActivity(), "UpdateSucces", Toast.LENGTH_LONG).show()
+                        Toast.makeText(requireActivity(), "Cập nhập thành công", Toast.LENGTH_LONG).show()
                         dismiss()
                         GlobalScope.launch {
                             var list = mutableListOf<ProductEntity>()

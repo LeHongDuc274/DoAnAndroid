@@ -2,6 +2,7 @@ package com.example.myapplication.ui.customer
 
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -13,6 +14,7 @@ import com.example.myapplication.core.model.OrderDetail
 import com.example.myapplication.core.model.ProductEntity
 import com.example.myapplication.databinding.BottomSheetDialogBinding
 import com.example.myapplication.ext.formatWithCurrency
+import com.example.myapplication.ext.showToast
 import com.example.myapplication.ui.admin.ProductFormFragment.Companion.EDIT_MODE
 import com.example.myapplication.ui.admin.ProductFormFragment.Companion.NEW_MODE
 import com.example.myapplication.viewmodel.CustomerViewModel
@@ -72,13 +74,14 @@ class BottomSheetProductsFragment(private val activity: Context) : BottomSheetDi
         val detail = orderDetails!!.copyInstance()
         detail.amount = count
         detail.note = binding.edtNote.text.toString()
+        detail.total_price = count * (product?.price ?: 1)
         GlobalScope.launch {
             val list = mutableListOf<OrderDetail>()
             list.addAll(viewModel.listOrderDetails.value)
             val index = viewModel.listOrderDetails.value.indexOfFirst {
                 it.product_id == orderDetails!!.product_id && it.status < 2
             }
-            if ( viewModel.order.id != -1) { // đã submit , đã có Order
+            if (viewModel.order.id != -1) { // đã submit , đã có Order
                 if (detail.status < ItemStatus.PREPARING.status) { // preparing
                     viewModel.updateOrderDetails(detail) { b, mess, data ->
                         Toast.makeText(activity, mess, Toast.LENGTH_LONG).show()
@@ -90,7 +93,7 @@ class BottomSheetProductsFragment(private val activity: Context) : BottomSheetDi
                 } else {
                     Toast.makeText(
                         activity,
-                        "this product was preparing",
+                        "sản phẩm đã được chuẩn bị",
                         Toast.LENGTH_LONG
                     ).show()
                 }
@@ -107,7 +110,8 @@ class BottomSheetProductsFragment(private val activity: Context) : BottomSheetDi
             amount = count,
             note = binding.edtNote.text.toString(),
             user_id = viewModel.order.user_id,
-            order_id = viewModel.order.id
+            order_id = viewModel.order.id,
+            total_price = count * (product?.price ?: 1)
         )
         val list = mutableListOf<OrderDetail>()
         list.addAll(viewModel.listOrderDetails.value)
@@ -128,7 +132,7 @@ class BottomSheetProductsFragment(private val activity: Context) : BottomSheetDi
 
     private fun setTextAmount() {
         val priceStr = (price * count).formatWithCurrency()
-        val textPrice = String.format("Add to cart (%s)", priceStr)
+        val textPrice = String.format("Thêm sản phẩm (%s)", priceStr)
         binding.tvAddToCart.setText(textPrice)
         binding.edtCount.setText(count.toString())
     }
@@ -139,6 +143,12 @@ class BottomSheetProductsFragment(private val activity: Context) : BottomSheetDi
 
         product = viewModel.listProducts.value.find {
             it.id == id
+        }
+        product?.let {
+            if (it.status == 1) {
+                requireActivity().showToast("Sản phẩm hiện đang hết hàng , không thể đặt thêm!")
+                dismiss()
+            }
         }
         orderDetails = viewModel.listOrderDetails.value.find {
             (it.product_id == id && it.status < ItemStatus.PREPARING.status) // check ỏdetails có tồn tại và chưa preparing k

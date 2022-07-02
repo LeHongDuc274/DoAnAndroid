@@ -20,7 +20,8 @@ class TableAdminAdapter() : RecyclerView.Adapter<TableAdminAdapter.ViewHolder>()
                 binding.tvEdit.visibility = View.VISIBLE
                 binding.tvAdd.visibility = View.INVISIBLE
                 binding.tvName.text = listTable[layoutPosition].display_name
-                binding.tvStatus.text = "Status : " + listTable[layoutPosition].status
+                binding.tvStatus.text = if (listTable[layoutPosition].status == 0) "Đang hoạt động" else " Ngừng hoạt động"
+
             } else {
                 binding.tvName.visibility = View.INVISIBLE
                 binding.tvStatus.visibility = View.INVISIBLE

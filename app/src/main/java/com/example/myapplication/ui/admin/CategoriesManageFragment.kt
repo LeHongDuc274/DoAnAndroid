@@ -53,13 +53,13 @@ class CategoriesManageFragment() : BaseDialogFragment(R.layout.fragment_categori
         binding.tvAdd.setOnClickListener {
             when {
                 binding.edtAdd.text.isBlank() -> {
-                    Toast.makeText(requireActivity(), "Name cann't be blank", Toast.LENGTH_LONG)
+                    Toast.makeText(requireActivity(), "Tên không được để trống", Toast.LENGTH_LONG)
                         .show()
                 }
                 (viewmodel.listCategories.value.any {
                     it.name_type.equals(binding.edtAdd.text.toString())
                 }) -> {
-                    Toast.makeText(requireActivity(), "Name cann't be duplicate", Toast.LENGTH_LONG)
+                    Toast.makeText(requireActivity(), "Tên không thể trùng nhau", Toast.LENGTH_LONG)
                         .show()
                 }
                 else -> adminViewModel.createCategory(binding.edtAdd.text.toString()) { b, str, category ->
@@ -81,7 +81,7 @@ class CategoriesManageFragment() : BaseDialogFragment(R.layout.fragment_categori
             layoutManager = LinearLayoutManager(requireActivity())
             adapter = categoryAdapter
         }
-        binding.icToolbar.tvTitle.text = "Category Manage"
+        binding.icToolbar.tvTitle.text = "Quản lí phân loại"
 
     }
 

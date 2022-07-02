@@ -3,6 +3,7 @@ package com.example.myapplication.ui.kitchen
 import android.graphics.Color
 import android.graphics.PorterDuff
 import android.os.Bundle
+import android.view.View
 import android.widget.Toast
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -39,7 +40,7 @@ class KitchenActivity : BaseActivity() {
     private fun initListener() {
         kitchenVM.initViewModel()
         collectFlow(kitchenVM.listProducts) {
-            if (it.isNotEmpty()) {
+            if (it.isNotEmpty() && !kitchenVM.connection) {
                 kitchenVM.initSocket()
             }
         }
@@ -64,7 +65,7 @@ class KitchenActivity : BaseActivity() {
                         }
                     }
                 } else {
-                    showToast("Paswword is Blank")
+                    showToast("Mật khẩu trống")
                 }
             }
         }
@@ -78,13 +79,27 @@ class KitchenActivity : BaseActivity() {
         collectFlow(kitchenVM.listComplete) {
             completedAdapter.setData(it)
         }
+        collectFlow(kitchenVM.isLoading){
+            showLoading(it)
+        }
     }
 
+    private fun showLoading(b: Boolean){
+        if(b){
+            binding.llLoading.visibility = View.VISIBLE
+            binding.llLoading.isClickable = true
+        } else {
+            binding.llLoading.visibility = View.INVISIBLE
+            binding.llLoading.isClickable = false
+        }
+    }
     private fun increaseStatus(orderDetail: OrderDetail) {
+        kitchenVM.isLoading.value = true
         orderDetail.apply {
             status = status.inc()
         }
         kitchenVM.updateOrderDetails(orderDetail) { b, str, details ->
+            kitchenVM.isLoading.value = false
             Toast.makeText(this, str, Toast.LENGTH_LONG).show()
         }
     }

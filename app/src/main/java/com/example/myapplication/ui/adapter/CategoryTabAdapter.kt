@@ -51,7 +51,7 @@ class CategoryTabAdapter(private val context: Context) :
     fun setData(list: MutableList<CategoryEntity>) {
         listCategories.clear()
         listCategories.addAll(list)
-        listCategories.add(0, CategoryEntity(-1, "All"))
+        listCategories.add(0, CategoryEntity(-1, "Tất cả"))
         notifyDataSetChanged()
     }
 

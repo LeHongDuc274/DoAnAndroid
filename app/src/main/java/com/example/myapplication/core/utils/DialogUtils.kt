@@ -12,8 +12,8 @@ fun Context.showDialogConfirmLogout(callback: (String) -> Unit) {
     val dialog = AlertDialog.Builder(this, R.style.AlertDialogTheme)
     dialog.apply {
         setView(binding.root)
-        setTitle("Log Out")
-        setNegativeButton("Cancel") { d, i ->
+        setTitle("Đăng xuất")
+        setNegativeButton("Huỷ") { d, i ->
         }
         setPositiveButton("Ok") { d, i ->
             callback.invoke(binding.editPassword.text.toString())
@@ -27,8 +27,8 @@ fun Context.showDialogResquestStaff(callback: (String) -> Unit) {
     val dialog = AlertDialog.Builder(this, R.style.AlertDialogTheme)
     dialog.apply {
         setView(binding.root)
-        setTitle("Request Staff")
-        setNegativeButton("Cancel") { d, i ->
+        setTitle("Gửi yêu cầu")
+        setNegativeButton("Huỷ") { d, i ->
         }
         setPositiveButton("Ok") { d, i ->
             callback.invoke(binding.editContent.text.toString())

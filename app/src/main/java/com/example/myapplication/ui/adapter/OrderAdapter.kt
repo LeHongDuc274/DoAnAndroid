@@ -1,6 +1,5 @@
 package com.example.myapplication.ui.adapter
 
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,6 +9,7 @@ import com.example.myapplication.core.ItemStatus
 import com.example.myapplication.core.model.OrderDetail
 import com.example.myapplication.core.utils.Utils
 import com.example.myapplication.databinding.OrderItemLineBinding
+import com.example.myapplication.ext.formatWithCurrency
 
 class OrderAdapter : RecyclerView.Adapter<OrderAdapter.ViewHolder>() {
     private var listOrder = mutableListOf<OrderDetail>()
@@ -24,9 +24,8 @@ class OrderAdapter : RecyclerView.Adapter<OrderAdapter.ViewHolder>() {
             product?.let {
                 binding.tvPerPrice.text = it.price.toString()
                 binding.tvProduct.text = it.name
-                binding.tvPrice.text = ((it.price) * (orderDetail.amount)).toString() + "vnđ"
+                binding.tvPrice.text = ((it.price) * (orderDetail.amount)).formatWithCurrency()
                 Glide.with(binding.root.context).load(it.image_url).into(binding.ivProduct)
-                binding.ivProduct
             }
             binding.tvCount.text = orderDetail.amount.toString()
             val status = Utils.getByStatus(orderDetail.status)
@@ -39,7 +38,7 @@ class OrderAdapter : RecyclerView.Adapter<OrderAdapter.ViewHolder>() {
                 }
             }
             if (orderDetail.note.isBlank()) {
-                binding.tvNote.text = "Note..."
+                binding.tvNote.text = "Ghi chú ..."
             } else {
                 binding.tvNote.text = orderDetail.note
             }

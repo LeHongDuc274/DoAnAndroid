@@ -56,6 +56,8 @@ interface UserService {
     @GET("/messages/requesting")
     fun getListMessageRequesting(): Call<MyResult<List<Message>>>
 
+    @PATCH("/messages/edit")
+    fun doRequestMessage(@Query("id") id: Int) : Call<MyResult<Message>>
 
     companion object {
         fun createLoginApi(): UserService {

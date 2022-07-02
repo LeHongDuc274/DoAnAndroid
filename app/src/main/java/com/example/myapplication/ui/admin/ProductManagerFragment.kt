@@ -1,10 +1,12 @@
 package com.example.myapplication.ui.admin
 
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.core.os.bundleOf
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
@@ -32,6 +34,7 @@ class ProductManagerFragment : Fragment() {
         _binding = FragmentProductManagerBinding.inflate(inflater, container, false)
         viewModel = ViewModelProvider(requireActivity())[AdminViewModel::class.java]
         cateAdapter = CategoryTabAdapter(requireContext())
+
         return binding.root
     }
 
@@ -51,6 +54,7 @@ class ProductManagerFragment : Fragment() {
         collectFlow(viewModel.listProductFilter) {
             prAdapter.setData(it)
         }
+
         cateAdapter.setOnClickItem {
             viewModel.setListProductByCategory(it.id)
         }
@@ -100,5 +104,4 @@ class ProductManagerFragment : Fragment() {
         super.onDestroy()
         _binding = null
     }
-
 }

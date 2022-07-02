@@ -13,25 +13,43 @@ import retrofit2.http.*
 
 interface OrderService {
     @POST("/orders/create")
-    fun createOrder(@Body order : Order): Call<MyResult<Order?>>
+    fun createOrder(@Body order: Order): Call<MyResult<Order?>>
 
     @PUT("/order_details/update")
-    fun updateOrderDetails(@Body order : OrderDetail): Call<MyResult<OrderDetail>>
+    fun updateOrderDetails(@Body order: OrderDetail): Call<MyResult<OrderDetail>>
 
     @POST("/order_details/create")
-    fun createOrderDetails(@Body order : OrderDetail): Call<MyResult<OrderDetail>>
+    fun createOrderDetails(@Body order: OrderDetail): Call<MyResult<OrderDetail>>
 
     @GET("/order_details/ordering")
-    fun getListOrderDetails() : Call<MyResult<List<OrderDetail>>>
+    fun getListOrderDetails(): Call<MyResult<List<OrderDetail>>>
 
     @GET("/orders/ordering")
-    fun getListOrdering() : Call<MyResult<MutableList<TableOrdering>>>
+    fun getListOrdering(): Call<MyResult<MutableList<TableOrdering>>>
+
+    @DELETE("/order_details/delete")
+    fun deleteOrderDetails(@Query("id") id: Int): Call<MyResult<String>>
 
     @GET("/orders/order")
-    fun getCurrentOrder(@Query("user_id") user_id : Int = -1) :Call<MyResult<Order?>>
+    fun getCurrentOrder(@Query("user_id") user_id: Int = -1): Call<MyResult<Order?>>
 
     @PATCH("/orders/complete")
-    fun completeOrder(@Query("user_id") user_id: Int) : Call<MyResult<Order?>>
+    fun completeOrder(
+        @Query("user_id") user_id: Int,
+        @Query("total_price") total_price: Int
+    ): Call<MyResult<Order?>>
+
+    @GET("/reports/report_today")
+    fun getReportToday(): Call<MyResult<ReportToday>>
+
+    @GET("/reports/revenue_last_week")
+    fun getRevenueLastWeek(): Call<MyResult<List<RevenueReport>>>
+
+    @GET("/reports/revenue_all_time")
+    fun getRevenueAllTime(): Call<MyResult<List<RevenueReport>>>
+
+    @GET("/reports/product")
+    fun getProductReport(@Query("type") type: Int): Call<MyResult<List<ProductReport>>>
 
     companion object {
         fun createOrderApi(token: String): OrderService {

@@ -66,7 +66,7 @@ class UserFormFragment : BaseDialogFragment(R.layout.fragment_user_form) {
             else -> ""
         }
         if (loginId.isBlank() || displayName.isBlank() || status.isBlank() || role.isBlank()) {
-            Toast.makeText(requireActivity(), "Value cann't be blank", Toast.LENGTH_LONG).show()
+            Toast.makeText(requireActivity(), "Nhập các trường bắt buộc", Toast.LENGTH_LONG).show()
         } else {
             adminViewmodel.editUser(user!!.id, displayName, status, role) { b, str, user ->
                 Toast.makeText(requireActivity(), str, Toast.LENGTH_LONG).show()
@@ -92,7 +92,7 @@ class UserFormFragment : BaseDialogFragment(R.layout.fragment_user_form) {
                 passwordConfirm
             ))
         ) {
-            Toast.makeText(requireActivity(), "Value cann't be blank", Toast.LENGTH_LONG).show()
+            Toast.makeText(requireActivity(), "Nhập các trường bắt buộc", Toast.LENGTH_LONG).show()
         } else {
             adminViewmodel.createUser(
                 loginId,
@@ -122,14 +122,14 @@ class UserFormFragment : BaseDialogFragment(R.layout.fragment_user_form) {
             binding.edtPasswordConfirm.visibility = View.GONE
             binding.tvPassword.visibility = View.GONE
             binding.tvPasswordConfirm.visibility = View.GONE
-            binding.tvEdit.text = "Edit"
+            binding.tvEdit.text = "Sửa"
             when (user!!.role) {
                 Role.STAFF.code -> binding.rgRole.check(binding.rbStaff.id)
                 Role.TABLE.code -> binding.rgRole.check(binding.rbTable.id)
                 Role.KITCHEN.code -> binding.rgRole.check(binding.rbKitchen.id)
             }
         }
-        binding.icToolBar.tvTitle.text = "User"
+        binding.icToolBar.tvTitle.text = "Người dùng"
     }
 
     override fun onDestroy() {

@@ -8,7 +8,4 @@
     android:background="@color/color_background_item"
     tools:context=".ui.customer.OrdersFragment">
 
-
-
-
 </androidx.drawerlayout.widget.DrawerLayout>

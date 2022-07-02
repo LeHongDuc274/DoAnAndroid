@@ -60,7 +60,6 @@ class SettingFragment : Fragment() {
             tableAdapter.setData(it)
         }
         tableAdapter.setOnItemClick {
-            Log.e("tagUser",it.toString())
             if (it.id == -1) {
                 newUser()
             } else {
@@ -107,7 +106,7 @@ class SettingFragment : Fragment() {
 
     private fun initViews() {
         changeTab(Role.TABLE.code)
-        binding.toolBar.tvTitle.text = "User Manage"
+        binding.toolBar.tvTitle.text = "Quản lí người dùng"
         binding.toolBar.tvBack.visibility = View.INVISIBLE
         binding.rvUser.apply {
             adapter = tableAdapter

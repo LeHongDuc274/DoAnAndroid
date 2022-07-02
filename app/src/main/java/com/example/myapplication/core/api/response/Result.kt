@@ -9,7 +9,8 @@ data class Result(
 
 data class MyResult<T>(
     val status: Boolean,
-    val data : T
+    val message: String,
+    val data: T
 )
 
 data class TableOrdering(
@@ -35,3 +36,27 @@ data class UserResponse(
     val status: Int,
     val role: Int
 )
+
+data class ReportToday(
+    val total_revenue: Int,
+    val total_revenue_change: Float,
+    val total_dish_order: Int,
+    val total_dish_order_change: Float,
+    val total_customer: Int,
+    val total_customer_change: Float
+)
+
+data class RevenueReport(
+    val time: String,
+    val revenue: Int
+)
+
+data class ProductReport(
+    val product: Int,
+    val category_id: Int,
+    val product_name: String,
+    val count: Int,
+    val revenue: Int
+)
+
+

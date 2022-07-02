@@ -1,7 +1,6 @@
 package com.example.myapplication.ui.admin
 
 import android.os.Bundle
-import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -13,11 +12,9 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.myapplication.core.ItemStatus
 import com.example.myapplication.databinding.FragmentOrderManagerBinding
-import com.example.myapplication.databinding.MessageBottomSheetFragmentBinding
 import com.example.myapplication.ext.collectFlow
 import com.example.myapplication.ui.adapter.OrderAdapter
 import com.example.myapplication.ui.adapter.TableOrderAdapter
-import com.example.myapplication.ui.customer.BottomSheetProductsFragment
 import com.example.myapplication.viewmodel.AdminViewModel
 
 
@@ -58,13 +55,13 @@ class OrderManagerFragment : Fragment() {
             }
         }
         collectFlow(adminViewModel.listMessageRequesting) {
-            if (it.isNotEmpty()) tableAdapter.setListMessage(it)
+            tableAdapter.setListMessage(it)
         }
         collectFlow(adminViewModel.listOrderDetailsByTable) {
             orderDetailAdapter.setData(it)
         }
         tableAdapter.setOnItemClick {
-            binding.tvDetailTable.text = it.display_name + " Order"
+            binding.tvDetailTable.text = "Đơn hàng của " + it.display_name
             adminViewModel.subscribeChannel(it.user_id)
             adminViewModel.getCurrentOrder(it.user_id) { b, mess, res ->
                 if (b && res != null) adminViewModel.setListOrderDetailsByTable(
@@ -82,7 +79,7 @@ class OrderManagerFragment : Fragment() {
         binding.tvComplete.setOnClickListener {
             // Tạm thời để DELIVERING , làm màn staff xong chuyen lai thanh DELEVERED
             if (adminViewModel.listOrderDetailsByTable.value.isEmpty() || adminViewModel.listOrderDetailsByTable.value.any { it.status < ItemStatus.DELIVERING.status }) {
-                Toast.makeText(requireActivity(), "Order is valid", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireActivity(), "Đơn hàng chưa hoàn thành", Toast.LENGTH_SHORT).show()
             } else {
                 adminViewModel.completeOrder()
             }

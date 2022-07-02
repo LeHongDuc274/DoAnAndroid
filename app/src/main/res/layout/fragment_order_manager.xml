@@ -28,7 +28,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="8dp"
-        android:text="Table Report"
+        android:text="Danh sách bàn"
         android:textColor="@color/white"
         android:textSize="16sp"
         android:textStyle="bold"
@@ -51,7 +51,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="8dp"
-        android:text="Order"
+        android:text="Đơn hàng"
         android:textColor="@color/white"
         android:textSize="14sp"
         android:textStyle="italic"
@@ -76,12 +76,11 @@
         android:background="@drawable/background_buttom"
         android:paddingHorizontal="32dp"
         android:paddingVertical="4dp"
-        android:text="Complete Order"
+        android:text="Hoàn tất thanh toán"
         android:textColor="@color/white"
         android:textSize="12sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="@+id/gl_1" />
-
 
 </androidx.constraintlayout.widget.ConstraintLayout>

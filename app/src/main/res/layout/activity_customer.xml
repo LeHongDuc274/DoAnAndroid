@@ -120,7 +120,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="12dp"
             android:layout_marginTop="8dp"
-            android:text="Choose Dishes"
+            android:text="Chọn sản phẩm"
             android:textColor="@color/white"
             android:textSize="18sp"
             app:layout_constraintStart_toStartOf="parent"
@@ -155,7 +155,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="8dp"
-                android:text="Orders"
+                android:text="Đơn hàng"
                 android:textColor="@color/white"
                 android:textSize="14sp"
                 android:textStyle="bold"
@@ -177,7 +177,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Item"
+                    android:text="Sản phẩm"
                     android:textColor="@color/white"
                     android:textSize="16sp"
                     android:textStyle="italic" />
@@ -198,7 +198,7 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
                         android:layout_marginHorizontal="4dp"
-                        android:text="Q.ty"
+                        android:text="S.L"
                         android:textColor="@color/white"
                         android:textSize="10sp" />
                 </com.google.android.material.card.MaterialCardView>
@@ -209,7 +209,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="end|center_vertical"
                     android:layout_marginEnd="8dp"
-                    android:text="Price"
+                    android:text="Thành tiền"
                     android:textColor="#B32424"
                     android:textSize="10sp"
                     android:textStyle="bold" />
@@ -265,7 +265,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Sub Total"
+                        android:text="Tổng tiền"
                         android:textColor="@color/white"
                         android:textSize="8sp"
                         android:textStyle="italic" />
@@ -290,7 +290,7 @@
                     android:layout_marginVertical="12dp"
                     android:background="@drawable/background_buttom"
                     android:padding="8dp"
-                    android:text="Submit"
+                    android:text="Xác nhận"
                     android:textAlignment="center"
                     android:textColor="@color/white"
                     android:textSize="16sp"

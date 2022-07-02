@@ -33,11 +33,11 @@ enum class TabItem(val title: String, val icon: String, code: Int) {
 
 enum class ItemStatus(val title: String, val status: Int) {
     NONE("None", -1),
-    PENDING("Pending", 0),
-    PREPARING("Preparing", 1),
-    COMPLETED("Completed", 2),
-    DELIVERING("Delivering", 3),
-    DELIVERED("Delivered", 4)
+    PENDING("Đang chờ", 0),
+    PREPARING("Đang chuẩn bị", 1),
+    COMPLETED("Hoàn thành", 2),
+    DELIVERING("Đang giao", 3),
+    DELIVERED("Đã giao", 4)
 }
 
 const val COMMAND = "command"
