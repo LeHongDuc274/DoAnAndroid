@@ -48,12 +48,13 @@
             app:layout_constraintStart_toEndOf="@+id/tv_title"
             app:layout_constraintTop_toTopOf="@id/tv_title">
 
-            <ImageView
+            <ImageButton
                 android:id="@+id/iv_message"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:layout_margin="4dp"
-                android:src="@drawable/notifications_active_black_48"
+                android:background="@color/color_background_item"
+                android:src="@drawable/baseline_notifications_active_24"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
@@ -62,20 +63,21 @@
                 android:id="@+id/tv_count_message"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="12"
                 android:background="@drawable/back_ground_new_product"
+                android:text="12"
                 android:textColor="@color/white"
                 android:textSize="12sp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
         </androidx.constraintlayout.widget.ConstraintLayout>
 
-        <ImageView
+        <ImageButton
             android:id="@+id/iv_logout"
             android:layout_width="24dp"
             android:layout_height="24dp"
             android:layout_margin="8dp"
-            android:src="@drawable/baseline_logout_black_48"
+            android:background="@color/color_background_item"
+            android:src="@drawable/baseline_logout_24"
             app:layout_constraintBottom_toBottomOf="@id/tv_title"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="@id/tv_title" />

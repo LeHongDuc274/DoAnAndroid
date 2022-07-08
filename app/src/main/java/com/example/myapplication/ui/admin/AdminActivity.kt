@@ -5,7 +5,7 @@ import android.graphics.PorterDuff
 import android.os.Bundle
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.myapplication.BaseActivity
+import com.example.myapplication.ui.login.BaseActivity
 import com.example.myapplication.core.TabItem
 import com.example.myapplication.core.utils.showDialogConfirmLogout
 import com.example.myapplication.databinding.ActivityAdminBinding

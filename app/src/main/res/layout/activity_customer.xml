@@ -67,16 +67,16 @@
                 android:orientation="vertical"
                 app:layout_constraintGuide_percent="0.5" />
 
-            <ImageView
+            <ImageButton
                 android:id="@+id/iv_request_staff"
                 android:layout_width="30dp"
                 android:layout_height="30dp"
                 android:layout_marginHorizontal="12dp"
-                android:src="@drawable/notifications_active_black_48"
-                android:textColor="@color/white"
-                app:layout_constraintHorizontal_bias="1"
+                android:background="@color/color_background_grey"
+                android:src="@drawable/baseline_notifications_active_white24"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toStartOf="@id/iv_cart"
+                app:layout_constraintHorizontal_bias="1"
                 app:layout_constraintStart_toStartOf="@+id/guideline3"
                 app:layout_constraintTop_toTopOf="parent" />
 
@@ -87,9 +87,9 @@
                 android:layout_marginHorizontal="12dp"
                 android:src="@drawable/orders"
                 android:textColor="@color/white"
-                app:layout_constraintHorizontal_bias="1"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="1"
                 app:layout_constraintStart_toStartOf="@+id/guideline3"
                 app:layout_constraintTop_toTopOf="parent" />
         </androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,4 +1,4 @@
-package com.example.myapplication
+package com.example.myapplication.ui.login
 
 import android.content.Context
 import android.content.Intent
@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Toast
 import androidx.lifecycle.ViewModelProvider
+import com.example.myapplication.R
 import com.example.myapplication.databinding.ActivityLoginBinding
 import com.example.myapplication.ui.admin.AdminActivity
 import com.example.myapplication.ui.customer.CustomerActivity

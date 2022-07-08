@@ -121,14 +121,14 @@ class ProductFormFragment : BaseDialogFragment(R.layout.fragment_product_form) {
                     if (b) {
                         Toast.makeText(requireActivity(), "Thành công", Toast.LENGTH_LONG).show()
                         dismiss()
-                        GlobalScope.launch {
-
-                            var list = mutableListOf<ProductEntity>()
-                            list.addAll(adminVM.listProducts.value)
-                            list.add(0, pr!!)
-                            adminVM.listProducts.emit(list)
-                            adminVM.setListProductByCategory(adminVM.categorySelected)
-                        }
+//                        GlobalScope.launch {
+//
+//                            var list = mutableListOf<ProductEntity>()
+//                            list.addAll(adminVM.listProducts.value)
+//                            list.add(0, pr!!)
+//                            adminVM.listProducts.emit(list)
+//                            adminVM.setListProductByCategory(adminVM.categorySelected)
+//                        }
 
                     } else {
                         Toast.makeText(requireActivity(), str, Toast.LENGTH_LONG).show()
@@ -151,15 +151,15 @@ class ProductFormFragment : BaseDialogFragment(R.layout.fragment_product_form) {
                     if (b) {
                         Toast.makeText(requireActivity(), "Cập nhập thành công", Toast.LENGTH_LONG).show()
                         dismiss()
-                        GlobalScope.launch {
-                            var list = mutableListOf<ProductEntity>()
-                            list.addAll(adminVM.listProducts.value)
-                            val index =
-                                adminVM.listProducts.value.indexOfFirst { it.id == pr!!.id }
-                            list.set(index, pr!!)
-                            adminVM.listProducts.emit(list)
-                            adminVM.setListProductByCategory(adminVM.categorySelected)
-                        }
+//                        GlobalScope.launch {
+//                            var list = mutableListOf<ProductEntity>()
+//                            list.addAll(adminVM.listProducts.value)
+//                            val index =
+//                                adminVM.listProducts.value.indexOfFirst { it.id == pr!!.id }
+//                            list.set(index, pr!!)
+//                            adminVM.listProducts.emit(list)
+//                            adminVM.setListProductByCategory(adminVM.categorySelected)
+//                        }
                     } else {
                         Toast.makeText(requireActivity(), str, Toast.LENGTH_LONG).show()
                     }

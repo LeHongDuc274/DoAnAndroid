@@ -14,7 +14,7 @@ import androidx.core.view.GravityCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.myapplication.BaseActivity
+import com.example.myapplication.ui.login.BaseActivity
 import com.example.myapplication.core.utils.showDialogConfirmLogout
 import com.example.myapplication.core.utils.showDialogResquestStaff
 import com.example.myapplication.databinding.ActivityCustomerBinding
@@ -73,7 +73,7 @@ class CustomerActivity : BaseActivity() {
                 AlertDialog.Builder(this)
                     .setTitle("Đơn hàng bạn gặp sự cố")
                     .setMessage("Sản phẩm $it đã được xoá khỏi đơn hàng")
-                    .setPositiveButton("Yes", DialogInterface.OnClickListener { dialog, which -> })
+                    .setPositiveButton("Ok", DialogInterface.OnClickListener { dialog, which -> })
                     .setNegativeButton("", null).show()
             }
         }
@@ -87,15 +87,12 @@ class CustomerActivity : BaseActivity() {
             viewmodel.setListProductByCategory(it.id)
         }
         orderAdapter.setDeleteClick { p ->
-            val orderDetail = viewmodel.listOrderDetails.value.find {
-                it.id == p.id
+            if (p.id == -1) {
+                viewmodel.listOrderDetails.value =
+                    (viewmodel.listOrderDetails.value - p).toMutableList()
+            } else {
+                viewmodel.deleteOrderDetails(p.id)
             }
-            orderDetail?.apply {
-                amount = 0
-                note = "Ghi chú ..."
-            }
-            // call API delete this order Detail
-            // viewmodel.setListOrder(list)
         }
 
         orderAdapter.setOnEditClick {

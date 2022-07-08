@@ -1,9 +1,10 @@
-package com.example.myapplication
+package com.example.myapplication.ui.login
 
 import android.content.Context
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import com.example.myapplication.R
 import com.example.myapplication.ui.admin.AdminActivity
 import com.example.myapplication.ui.customer.CustomerActivity
 import com.example.myapplication.ui.kitchen.KitchenActivity

@@ -7,7 +7,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
-import com.example.myapplication.LoginActivity
+import com.example.myapplication.ui.login.LoginActivity
 import com.example.myapplication.R
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect

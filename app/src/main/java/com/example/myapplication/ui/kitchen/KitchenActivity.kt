@@ -1,13 +1,18 @@
 package com.example.myapplication.ui.kitchen
 
+import android.content.DialogInterface
 import android.graphics.Color
 import android.graphics.PorterDuff
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
+import androidx.core.view.GravityCompat
 import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.myapplication.BaseActivity
+import com.example.myapplication.ui.login.BaseActivity
 import com.example.myapplication.core.model.OrderDetail
 import com.example.myapplication.core.utils.showDialogConfirmLogout
 import com.example.myapplication.databinding.ActivityKitchenBinding
@@ -15,16 +20,17 @@ import com.example.myapplication.ext.collectFlow
 import com.example.myapplication.ext.gotoLogin
 import com.example.myapplication.ext.showToast
 import com.example.myapplication.ui.adapter.OrderDetailKitchenAdapter
+import com.example.myapplication.ui.adapter.ProductManagerAdapter
 import com.example.myapplication.viewmodel.KitchenViewModel
 
 
 class KitchenActivity : BaseActivity() {
 
     private lateinit var binding: ActivityKitchenBinding
-    private val pendingAdapter = OrderDetailKitchenAdapter()
+    private val pendingAdapter = OrderDetailKitchenAdapter(false)
     private val preparingAdapter = OrderDetailKitchenAdapter()
     private val completedAdapter = OrderDetailKitchenAdapter()
-
+    private val productAdapetr = ProductManagerAdapter()
     private val kitchenVM: KitchenViewModel by lazy {
         ViewModelProvider(this)[KitchenViewModel::class.java]
     }
@@ -43,9 +49,31 @@ class KitchenActivity : BaseActivity() {
             if (it.isNotEmpty() && !kitchenVM.connection) {
                 kitchenVM.initSocket()
             }
+            productAdapetr.setRawData(it)
+        }
+        collectFlow(kitchenVM.listPending) {
+            pendingAdapter.setData(it)
+        }
+        collectFlow(kitchenVM.listPreparing) {
+            preparingAdapter.setData(it)
+        }
+        collectFlow(kitchenVM.listComplete) {
+            completedAdapter.setData(it)
+        }
+        collectFlow(kitchenVM.isLoading) {
+            showLoading(it)
         }
         pendingAdapter.setOnClick {
             increaseStatus(it)
+        }
+        pendingAdapter.setOnDeleteCick { productID ->
+            AlertDialog.Builder(this)
+                .setTitle("Xác nhận")
+                .setMessage("Lưu ý: Các đơn hàng đang chờ của sản phẩm này cũng sẽ bị xoá")
+                .setPositiveButton("Ok", DialogInterface.OnClickListener { dialog, which ->
+                    changeStatusProduct(productID)
+                })
+                .setNegativeButton("Huỷ", null).show()
         }
         preparingAdapter.setOnClick {
             increaseStatus(it)
@@ -53,7 +81,17 @@ class KitchenActivity : BaseActivity() {
         completedAdapter.setOnClick {
             increaseStatus(it)
         }
-
+        productAdapetr.onClick {
+            val mesage =
+                if (it.status == 0) "Lưu ý: Các đơn hàng đang chờ của sản phẩm này cũng sẽ bị xoá" else "Mở lại sản phẩm này!"
+            AlertDialog.Builder(this)
+                .setTitle("Xác nhận")
+                .setMessage(mesage)
+                .setPositiveButton("Ok") { _, _ ->
+                    changeStatusProduct(it.id)
+                }
+                .setNegativeButton("Huỷ", null).show()
+        }
         binding.ivLogout.setOnClickListener {
             showDialogConfirmLogout {
                 if (it.isNotBlank()) {
@@ -69,23 +107,20 @@ class KitchenActivity : BaseActivity() {
                 }
             }
         }
-
-        collectFlow(kitchenVM.listPending) {
-            pendingAdapter.setData(it)
-        }
-        collectFlow(kitchenVM.listPreparing) {
-            preparingAdapter.setData(it)
-        }
-        collectFlow(kitchenVM.listComplete) {
-            completedAdapter.setData(it)
-        }
-        collectFlow(kitchenVM.isLoading){
-            showLoading(it)
+        binding.ivSetting.setOnClickListener {
+            binding.root.openDrawer(GravityCompat.END)
         }
     }
 
-    private fun showLoading(b: Boolean){
-        if(b){
+    private fun changeStatusProduct(productID: Int) {
+        kitchenVM.isLoading.value = true
+        kitchenVM.changeStatusProduct(productID) { b, mess, data ->
+            kitchenVM.isLoading.value = false
+        }
+    }
+
+    private fun showLoading(b: Boolean) {
+        if (b) {
             binding.llLoading.visibility = View.VISIBLE
             binding.llLoading.isClickable = true
         } else {
@@ -93,6 +128,7 @@ class KitchenActivity : BaseActivity() {
             binding.llLoading.isClickable = false
         }
     }
+
     private fun increaseStatus(orderDetail: OrderDetail) {
         kitchenVM.isLoading.value = true
         orderDetail.apply {
@@ -118,10 +154,18 @@ class KitchenActivity : BaseActivity() {
             layoutManager = LinearLayoutManager(this@KitchenActivity)
             adapter = completedAdapter
         }
-        binding.ivLogout.setColorFilter(
-            Color.parseColor("#F44336"),
-            PorterDuff.Mode.SRC_IN
-        )
+        binding.rvProduct.apply {
+            layoutManager = GridLayoutManager(this@KitchenActivity, 5)
+            adapter = productAdapetr
+        }
+    }
+
+    override fun onBackPressed() {
+        if (binding.root.isDrawerOpen(GravityCompat.END)) {
+            binding.root.closeDrawer(GravityCompat.END)
+        } else {
+            super.onBackPressed()
+        }
     }
 
     override fun onDestroy() {

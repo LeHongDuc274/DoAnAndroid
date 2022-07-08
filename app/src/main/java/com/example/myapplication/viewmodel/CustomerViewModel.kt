@@ -2,6 +2,7 @@ package com.example.myapplication.viewmodel
 
 import android.app.Application
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.viewModelScope
 import com.example.myapplication.core.*
@@ -120,7 +121,7 @@ class CustomerViewModel(private val app: Application) : BaseViewModel(app) {
             val detail = listOrderDetails.value.get(index)
             when {
                 (detail.id != -1 && detail.status < 1) -> {
-                    deleteOrderDetails(detail.id)
+                   // deleteOrderDetails(detail.id)
                     arletMessage.value = listProducts.value.findLast {
                         productEntity.id == it.id
                     }?.name ?: ""

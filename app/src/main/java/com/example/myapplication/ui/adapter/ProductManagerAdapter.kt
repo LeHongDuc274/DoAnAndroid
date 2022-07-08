@@ -20,7 +20,7 @@ class ProductManagerAdapter : RecyclerView.Adapter<ProductManagerAdapter.ViewHol
     inner class ViewHolder(val binding: ProductManagerItemBinding) :
         RecyclerView.ViewHolder(binding.root) {
         fun bind() {
-            if (layoutPosition == 0) {
+            if (listProduct[layoutPosition].id == -1) {
                 binding.tvName.visibility = View.INVISIBLE
                 binding.tvPrice.visibility = View.INVISIBLE
                 binding.ivProduct.visibility = View.INVISIBLE
@@ -71,6 +71,11 @@ class ProductManagerAdapter : RecyclerView.Adapter<ProductManagerAdapter.ViewHol
     fun setData(list: List<ProductEntity>) {
         listProduct = list.toMutableList()
         listProduct.add(0, ProductEntity(-1, "", "", 0, 1,-1,null,"",""))
+        notifyDataSetChanged()
+    }
+
+    fun setRawData(list: List<ProductEntity>) {
+        listProduct = list.toMutableList()
         notifyDataSetChanged()
     }
 

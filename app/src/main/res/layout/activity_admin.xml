@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/color_background_item"
     tools:context=".ui.admin.AdminActivity">
 
     <androidx.recyclerview.widget.RecyclerView
@@ -18,20 +19,19 @@
     <LinearLayout
         android:id="@+id/ll_v"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         android:background="@color/color_background_item"
         android:orientation="horizontal"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="@id/rv_tab"
-        app:layout_constraintStart_toStartOf="@id/rv_tab">
+        app:layout_constraintStart_toStartOf="parent">
 
-        <ImageView
+        <ImageButton
             android:id="@+id/iv_logout"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
-            android:layout_margin="10dp"
-            android:src="@drawable/baseline_logout_black_48"
-            android:tintMode="src_atop" />
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="@color/color_background_item"
+            android:src="@drawable/baseline_logout_24" />
     </LinearLayout>
 
 

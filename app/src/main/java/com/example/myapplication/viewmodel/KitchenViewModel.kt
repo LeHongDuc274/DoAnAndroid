@@ -1,12 +1,15 @@
 package com.example.myapplication.viewmodel
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.viewModelScope
 import com.example.myapplication.core.*
 import com.example.myapplication.core.api.OrderService
+import com.example.myapplication.core.api.ProductService
 import com.example.myapplication.core.api.UserService
 import com.example.myapplication.core.api.response.*
 import com.example.myapplication.core.model.OrderDetail
+import com.example.myapplication.core.model.ProductEntity
 import com.example.myapplication.core.utils.GsonUtils
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -43,15 +46,19 @@ class KitchenViewModel(private val app: Application) : BaseViewModel(app) {
         ws = client.newWebSocket(request, object : WebSocketListener() {
             override fun onOpen(webSocket: WebSocket, response: okhttp3.Response) {
                 val order_details_Param = JSONObject()
-                order_details_Param.put(COMMAND, SUBSCRIBE)
+                val paramProduct = JSONObject()
+                val message_param = JSONObject()
                 val channel = JSONObject()
+                order_details_Param.put(COMMAND, SUBSCRIBE)
                 channel.put("channel", "OrderDetailChannel")
                 order_details_Param.put(IDENTIFIER, channel.toString())
-                ws?.send(order_details_Param.toString())
-                val message_param = JSONObject()
                 message_param.put(COMMAND, SUBSCRIBE)
                 message_param.put(IDENTIFIER, Channel.MESSAGE_CHANNEL.channel)
+                paramProduct.put(COMMAND, SUBSCRIBE)
+                paramProduct.put(IDENTIFIER, Channel.PRODUCT_CHANNEL.channel)
                 ws?.send(message_param.toString())
+                ws?.send(paramProduct.toString())
+                ws?.send(order_details_Param.toString())
                 connection = true
             }
 
@@ -64,6 +71,31 @@ class KitchenViewModel(private val app: Application) : BaseViewModel(app) {
                     }
                     res.identifier == Channel.MESSAGE_CHANNEL.channel -> {
                         handlerReceiNotice(res.message)
+                    }
+                    res.identifier == Channel.PRODUCT_CHANNEL.channel -> {
+                        try {
+                            val productEntity =
+                                GsonUtils.getGsonParser()
+                                    .fromJson(res.message, ProductEntity::class.java)
+                            if (productEntity == null) return
+                            val raw_image = productEntity.image_url
+                            val url = BASE_URL + raw_image.splitToSequence("?").first()
+                            productEntity.image_url = url
+                            val index = listProducts.value.indexOfLast {
+                                it.id == productEntity.id
+                            }
+                            if (index != -1) {
+                                val list = mutableListOf<ProductEntity>()
+                                list.addAll(listProducts.value)
+                                list.removeAt(index)
+                                list.add(index, productEntity)
+                                listProducts.value = list
+                            } else {
+                                listProducts.value += productEntity
+                            }
+                        } catch (e: java.lang.Exception) {
+                            e.printStackTrace()
+                        }
                     }
                 }
             }
@@ -102,14 +134,15 @@ class KitchenViewModel(private val app: Application) : BaseViewModel(app) {
                             listMessageRequesting.value =
                                 (it.data + listMessageRequesting.value).toMutableList()
                         }
-
                     }
                     "accept" -> {
                         it.data.let { mess ->
-                            listMessageRequesting.value = (listMessageRequesting.value - mess).toMutableList()
+                            listMessageRequesting.value =
+                                (listMessageRequesting.value - mess).toMutableList()
                         }
                     }
-                    else -> {}
+                    else -> {
+                    }
                 }
             }
         } catch (e: Exception) {
@@ -125,7 +158,7 @@ class KitchenViewModel(private val app: Application) : BaseViewModel(app) {
                     "create" -> {
                         //add more to list
                         val newData = it.data
-                        listOrderDetails.value = (newData + listOrderDetails.value).toMutableList()
+                        listOrderDetails.value += newData
                     }
 
                     "update" -> {
@@ -140,6 +173,7 @@ class KitchenViewModel(private val app: Application) : BaseViewModel(app) {
                     }
                     "delete" -> {
                         it.data.firstOrNull()?.let { detail ->
+                            Log.e("tagXX", detail.toString())
                             listOrderDetails.value -= detail
                         }
                     }
@@ -226,6 +260,27 @@ class KitchenViewModel(private val app: Application) : BaseViewModel(app) {
                 isLoading.value = false
             }
 
+        })
+    }
+
+    fun changeStatusProduct(productID: Int, onDone: (Boolean, String?, ProductEntity?) -> Unit) {
+        val api = ProductService.createProductApi(token)
+        val res = api.changeStatusProduct(productID)
+        res.enqueue(object : Callback<MyResult<ProductEntity>> {
+            override fun onResponse(
+                call: Call<MyResult<ProductEntity>>,
+                response: Response<MyResult<ProductEntity>>
+            ) {
+                if (response.isSuccessful) {
+                    onDone.invoke(true, null, response.body()!!.data)
+                } else {
+                    onDone.invoke(true, null, null)
+                }
+            }
+
+            override fun onFailure(call: Call<MyResult<ProductEntity>>, t: Throwable) {
+                onDone.invoke(false, t.message, null)
+            }
         })
     }
 

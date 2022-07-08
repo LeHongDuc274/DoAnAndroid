@@ -33,9 +33,10 @@
             android:textSize="13sp" />
     </LinearLayout>
 
-    <ImageView
+    <ImageButton
         android:id="@+id/iv_message"
         android:layout_width="24dp"
         android:layout_height="24dp"
-        android:src="@drawable/notifications_active_black_48" />
+        android:background="@color/color_background_item"
+        android:src="@drawable/baseline_notifications_active_24" />
 </LinearLayout>

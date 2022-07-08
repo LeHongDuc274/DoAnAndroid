@@ -26,6 +26,7 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import java.io.File
+import java.lang.Exception
 
 
 class AdminViewModel(private val app: Application) : BaseViewModel(app) {
@@ -78,14 +79,17 @@ class AdminViewModel(private val app: Application) : BaseViewModel(app) {
                 val param = JSONObject()
                 param.put(COMMAND, SUBSCRIBE)
                 param.put(IDENTIFIER, Channel.MESSAGE_CHANNEL.channel)
+                val param2 = JSONObject()
+                param2.put(COMMAND, SUBSCRIBE)
+                param2.put(IDENTIFIER, Channel.PRODUCT_CHANNEL.channel)
                 ws?.send(param.toString())
+                ws?.send(param2.toString())
                 subscribeChannel(tableIdSubscribe)
                 connection = true
             }
 
             override fun onMessage(webSocket: WebSocket, text: String) {
                 val res = GsonUtils.getGsonParser().fromJson(text, SocketMessage::class.java)
-                Log.e("TagMessageAdmin", text)
                 when {
                     res.identifier == orderChannelSubscribe && res.message == tableIdSubscribe.toString() -> {
                         getCurrentOrder(tableIdSubscribe) { b, mess, res ->
@@ -98,8 +102,34 @@ class AdminViewModel(private val app: Application) : BaseViewModel(app) {
                         getListTableOrder()
                     }
 
-                    res.identifier == Channel.MESSAGE_CHANNEL.channel && res.message == FLAG_UPDATE_MESSAGE -> {
+                    res.identifier == Channel.MESSAGE_CHANNEL.channel && res.message != FLAG_UPDATE_ORDER -> {
                         getListTableMessage()
+                    }
+
+                    res.identifier == Channel.PRODUCT_CHANNEL.channel -> {
+                        try {
+                            val productEntity =
+                                GsonUtils.getGsonParser()
+                                    .fromJson(res.message, ProductEntity::class.java)
+                            if (productEntity == null) return
+                            val raw_image = productEntity.image_url
+                            val url = BASE_URL + raw_image.splitToSequence("?").first()
+                            productEntity.image_url = url
+                            val index = listProducts.value.indexOfLast {
+                                it.id == productEntity.id
+                            }
+                            if (index != -1) {
+                                val list = mutableListOf<ProductEntity>()
+                                list.addAll(listProducts.value)
+                                list.removeAt(index)
+                                list.add(index, productEntity)
+                                listProducts.value = list
+                            } else {
+                                listProducts.value += productEntity
+                            }
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                        }
                     }
                 }
             }
@@ -218,7 +248,6 @@ class AdminViewModel(private val app: Application) : BaseViewModel(app) {
             put("price", createRequestBody(price))
             put("status", createRequestBody(status))
         }
-        Log.e("tagDataNew", "$id  $name")
         val res = api.updateProduct(
             map,
             imageBody
@@ -339,7 +368,7 @@ class AdminViewModel(private val app: Application) : BaseViewModel(app) {
             }
 
             override fun onFailure(call: Call<MyResult<User>>, t: Throwable) {
-                onDone.invoke(false,"Thất bại , thử lại sau", null)
+                onDone.invoke(false, "Thất bại , thử lại sau", null)
             }
         })
     }
@@ -434,7 +463,7 @@ class AdminViewModel(private val app: Application) : BaseViewModel(app) {
     fun completeOrder() {
         val api = OrderService.createOrderApi(token)
         val total_price = listOrderDetailsByTable.value.sumOf { it.total_price }
-        val res = api.completeOrder(tableIdSubscribe ,total_price)
+        val res = api.completeOrder(tableIdSubscribe, total_price)
         res.enqueue(object : Callback<MyResult<Order?>> {
             override fun onResponse(
                 call: Call<MyResult<Order?>>,

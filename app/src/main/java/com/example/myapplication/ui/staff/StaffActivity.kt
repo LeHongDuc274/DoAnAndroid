@@ -1,13 +1,7 @@
 package com.example.myapplication.ui.staff
 
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.content.Context
 import android.graphics.Color
 import android.graphics.PorterDuff
-import android.media.RingtoneManager
-import android.os.Build
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -16,8 +10,8 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.myapplication.BaseActivity
-import com.example.myapplication.MyApp
+import com.example.myapplication.ui.login.BaseActivity
+import com.example.myapplication.core.app.MyApp
 import com.example.myapplication.R
 import com.example.myapplication.core.model.OrderDetail
 import com.example.myapplication.core.utils.showDialogConfirmLogout
@@ -84,7 +78,8 @@ class StaffActivity : BaseActivity() {
             increaseStatus(it)
         }
 
-        binding.llMessage.setOnClickListener {
+        binding.ivMessage.setOnClickListener {
+            Log.e("tagXXX","message click")
             MessgeDialogFragment().show(supportFragmentManager, null)
         }
 

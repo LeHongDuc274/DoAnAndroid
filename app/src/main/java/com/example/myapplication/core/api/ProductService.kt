@@ -34,8 +34,8 @@ interface ProductService {
     ): Call<MyResult<ProductEntity>>
 
 
-    @DELETE("/products/delete")
-    fun deleteProduct(): Call<Response>
+    @PATCH("/products/change_status")
+    fun changeStatusProduct(@Query("id") id: Int): Call<MyResult<ProductEntity>>
 
     @GET("/categories/index")
     fun getListCategories(): Call<MyResult<List<CategoryEntity>>>
@@ -46,9 +46,6 @@ interface ProductService {
 
     @PATCH("/categories/edit")
     fun editCategory(): Call<Result>
-
-    @DELETE("/categories/delete")
-    fun deleteCategory(): Call<Response>
 
     companion object {
         fun createProductApi(token: String): ProductService {
