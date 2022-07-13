@@ -3,7 +3,9 @@ package com.example.myapplication.viewmodel
 import android.app.Application
 import android.content.Context
 import android.net.Uri
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.lifecycle.viewModelScope
 import com.example.myapplication.R
 import com.example.myapplication.core.*
@@ -15,7 +17,9 @@ import com.example.myapplication.core.model.*
 import com.example.myapplication.core.utils.GsonUtils
 import com.example.myapplication.core.utils.RealPathUtil
 import com.example.myapplication.ext.UserId
+import com.example.myapplication.ext.clearTime
 import com.example.myapplication.ext.createRequestBody
+import com.example.myapplication.ext.formatVN
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -27,6 +31,8 @@ import retrofit2.Callback
 import retrofit2.Response
 import java.io.File
 import java.lang.Exception
+import java.util.*
+import kotlin.collections.HashMap
 
 
 class AdminViewModel(private val app: Application) : BaseViewModel(app) {
@@ -40,6 +46,7 @@ class AdminViewModel(private val app: Application) : BaseViewModel(app) {
     val reportToday = MutableSharedFlow<ReportToday>()
     val revenueLastWeek = MutableStateFlow<MutableList<RevenueReport>>(mutableListOf())
     val revenueAllTime = MutableStateFlow<MutableList<RevenueReport>>(mutableListOf())
+    val revenuePeriodTime = MutableStateFlow<MutableList<RevenueReport>>(mutableListOf())
     val productReport = MutableStateFlow<MutableList<ProductReport>>(mutableListOf())
     val productReportByCategory = MutableStateFlow<MutableList<ProductReport>>(mutableListOf())
     var categoryIdReport = 0
@@ -47,7 +54,8 @@ class AdminViewModel(private val app: Application) : BaseViewModel(app) {
     var tableIdSubscribe = app.UserId()
     val orderChannelSubscribe get() = String.format(ORDER_CHANNEL_FORMAT, tableIdSubscribe)
     var pageSelected = 0
-
+    var startTimeRevenue = Calendar.getInstance().apply { clearTime() }
+    var endTimeRevenue = Calendar.getInstance().apply { clearTime() }
     private var client = OkHttpClient()
     private var ws: WebSocket? = null
     lateinit var request: Request
@@ -548,6 +556,29 @@ class AdminViewModel(private val app: Application) : BaseViewModel(app) {
             override fun onFailure(call: Call<MyResult<List<RevenueReport>>>, t: Throwable) {
 
             }
+        })
+    }
+
+    fun getRevenuePeriodTime(){
+        val api = OrderService.createOrderApi(token)
+        val res = api.getRevenuePeriodTime(startTimeRevenue.formatVN(), endTimeRevenue.formatVN())
+        res.enqueue(object : Callback<MyResult<List<RevenueReport>>>{
+            override fun onResponse(
+                call: Call<MyResult<List<RevenueReport>>>,
+                response: Response<MyResult<List<RevenueReport>>>
+            ) {
+                if (response.isSuccessful){
+//                    if (response.body()!!.message != null){
+                        revenuePeriodTime.value = mutableListOf()
+                    Log.e("tag1234",response.body()!!.data.size.toString())
+                        revenuePeriodTime.value = response.body()!!.data.toMutableList()
+//                    }
+                }
+            }
+
+            override fun onFailure(call: Call<MyResult<List<RevenueReport>>>, t: Throwable) {
+            }
+
         })
     }
 

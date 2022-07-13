@@ -74,8 +74,9 @@ class ProductManagerFragment : Fragment() {
     }
 
     private fun initViews() {
+        val manager = GridLayoutManager(requireActivity(), 4)
         binding.rvManagerProduct.apply {
-            layoutManager = GridLayoutManager(requireActivity(), 4)
+            layoutManager = manager
             adapter = prAdapter
         }
         binding.rvCategories.apply {

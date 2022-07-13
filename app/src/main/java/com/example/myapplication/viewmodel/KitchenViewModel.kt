@@ -38,6 +38,7 @@ class KitchenViewModel(private val app: Application) : BaseViewModel(app) {
     lateinit var request: Request
 
     fun initSocket() {
+        Log.e("tagCheck","init")
         getListOrderDetails()
         if (connection) return
         request = Request.Builder().url(WS_URL)

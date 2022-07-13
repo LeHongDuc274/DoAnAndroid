@@ -1,34 +1,41 @@
 package com.example.myapplication.wiget
 
 import android.content.Context
-import android.util.Log
-import android.view.LayoutInflater
-import com.example.myapplication.databinding.MarkerViewBinding
+import android.widget.TextView
+import com.example.myapplication.R
+import com.example.myapplication.ext.formatWithCurrency
 import com.github.mikephil.charting.components.MarkerView
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.highlight.Highlight
+import com.github.mikephil.charting.utils.MPPointF
+
 
 class PieMarkerView(context: Context, resid: Int) : MarkerView(context, resid) {
+    var tv_time: TextView
+    var tv_revenue: TextView
 
-    var binding: MarkerViewBinding
-
+    //    private val data = arrayListOf<>()
     init {
-        binding = MarkerViewBinding.inflate(LayoutInflater.from(context))
+        tv_time = findViewById(R.id.tv_time)
+        tv_revenue = findViewById(R.id.tv_revenue)
     }
 
     override fun refreshContent(e: Entry?, highlight: Highlight?) {
-        Log.e("tagCheck", e?.y.toString())
-        binding.tvName.text = e?.y.toString()
-       // super.refreshContent(e, highlight)
+        e?.let {
+            it.data?.let { data ->
+                val pair = data as Pair<String, Int>
+                tv_time.text = pair.first
+                tv_revenue.text = pair.second.formatWithCurrency()
+            }
+        }
+        super.refreshContent(e, highlight)
     }
 
-    fun getXOffset(): Int {
-        // this will center the marker-view horizontally
-        return -(width / 2)
+    override fun getOffset(): MPPointF {
+        return MPPointF(-(width / 2).toFloat(), -height.toFloat())
     }
 
-    fun getYOffset(): Int {
-        // this will cause the marker-view to be above the selected value
-        return -height
+    fun setData(data: String) {
+
     }
 }

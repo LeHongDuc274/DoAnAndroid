@@ -14,7 +14,6 @@ data class ProductEntity(
     var image_url: String = "",
     var created_at: String = "",
     var update_at: String = ""
-) {
-    var countOrder = 0
-    var note = ""
+){
+    var category_name: String? = null
 }

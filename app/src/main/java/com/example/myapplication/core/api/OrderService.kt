@@ -48,6 +48,12 @@ interface OrderService {
     @GET("/reports/revenue_all_time")
     fun getRevenueAllTime(): Call<MyResult<List<RevenueReport>>>
 
+    @GET("/reports/revenue_period_time")
+    fun getRevenuePeriodTime(
+        @Query("start") start: String,
+        @Query("end") end: String
+    ): Call<MyResult<List<RevenueReport>>>
+
     @GET("/reports/product")
     fun getProductReport(@Query("type") type: Int): Call<MyResult<List<ProductReport>>>
 

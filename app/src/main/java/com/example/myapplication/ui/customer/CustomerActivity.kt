@@ -24,6 +24,7 @@ import com.example.myapplication.ext.gotoLogin
 import com.example.myapplication.ext.showToast
 import com.example.myapplication.ui.adapter.CategoryTabAdapter
 import com.example.myapplication.ui.adapter.OrderAdapter
+import com.example.myapplication.ui.adapter.ProductManagerAdapter
 import com.example.myapplication.ui.adapter.ProductsAdapter
 import com.example.myapplication.viewmodel.CustomerViewModel
 
@@ -67,6 +68,7 @@ class CustomerActivity : BaseActivity() {
 
         collectFlow(viewmodel.listCategories) {
             categoryAdapter.setData(it)
+            productAdapter.setCategory(it)
         }
         collectFlow(viewmodel.arletMessage) {
             if (it.isNotBlank()) {
@@ -155,8 +157,15 @@ class CustomerActivity : BaseActivity() {
 
 
     private fun initView() {
+       val gridManager = GridLayoutManager(this@CustomerActivity, 4) .apply {
+            spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
+                override fun getSpanSize(position: Int): Int {
+                    return if (productAdapter.getItemViewType(position) == ProductsAdapter.TYPE_CATEGORY) 4 else 1
+                }
+            }
+        }
         binding.rvListProduct.apply {
-            layoutManager = GridLayoutManager(this@CustomerActivity, 4)
+            layoutManager = gridManager
             adapter = productAdapter
         }
 

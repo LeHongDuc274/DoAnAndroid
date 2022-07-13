@@ -9,7 +9,7 @@ data class Result(
 
 data class MyResult<T>(
     val status: Boolean,
-    val message: String,
+    val message: String?,
     val data: T
 )
 
