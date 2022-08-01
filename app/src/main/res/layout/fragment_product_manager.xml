@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/color_background_grey"
-    tools:context=".ui.admin.ProductManagerFragment">
+    tools:context=".ui.screen.admin.ProductManagerFragment">
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_categories"

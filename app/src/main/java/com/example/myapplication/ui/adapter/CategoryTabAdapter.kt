@@ -7,7 +7,7 @@ import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.example.myapplication.R
-import com.example.myapplication.core.model.CategoryEntity
+import com.example.myapplication.ui.model.CategoryEntity
 import com.example.myapplication.databinding.CategoryTabItemBinding
 
 class CategoryTabAdapter(private val context: Context) :

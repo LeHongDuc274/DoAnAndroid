@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/color_background_grey"
-    tools:context=".ui.admin.ChartFragment">
+    tools:context=".ui.screen.admin.ChartFragment">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -309,7 +309,7 @@
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="parent">
 
-                    <com.example.myapplication.wiget.MySpinner
+                    <com.example.myapplication.utils.wiget.MySpinner
                         android:id="@+id/sn_product_report"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"

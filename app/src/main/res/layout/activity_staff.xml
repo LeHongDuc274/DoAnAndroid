@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/color_background_grey"
-    tools:context=".ui.staff.StaffActivity">
+    tools:context=".ui.screen.staff.StaffActivity">
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/gl_1"

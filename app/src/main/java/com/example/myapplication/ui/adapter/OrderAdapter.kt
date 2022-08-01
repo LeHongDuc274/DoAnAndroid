@@ -6,8 +6,8 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.myapplication.core.ItemStatus
-import com.example.myapplication.core.model.OrderDetail
-import com.example.myapplication.core.utils.Utils
+import com.example.myapplication.ui.model.OrderDetail
+import com.example.myapplication.utils.Utils
 import com.example.myapplication.databinding.OrderItemLineBinding
 import com.example.myapplication.ext.formatWithCurrency
 

@@ -9,7 +9,7 @@
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
 
     <application
-        android:name=".core.app.MyApp"
+        android:name="com.example.myapplication.MyApp"
         android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -19,30 +19,30 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="m">
         <activity
-            android:name=".ui.staff.StaffActivity"
+            android:name="com.example.myapplication.ui.screen.staff.StaffActivity"
             android:exported="false"
             android:screenOrientation="landscape"
             tools:ignore="LockedOrientationActivity" />
         <activity
-            android:name=".ui.kitchen.KitchenActivity"
+            android:name="com.example.myapplication.ui.screen.kitchen.KitchenActivity"
             android:configChanges="orientation|keyboardHidden"
             android:exported="false"
             android:screenOrientation="landscape"
             tools:ignore="LockedOrientationActivity" />
         <activity
-            android:name=".ui.admin.AdminActivity"
+            android:name="com.example.myapplication.ui.screen.admin.AdminActivity"
             android:exported="false"
             android:screenOrientation="landscape" />
         <activity
-            android:name=".ui.login.LoginActivity"
+            android:name="com.example.myapplication.ui.screen.login.LoginActivity"
             android:exported="false"
             android:screenOrientation="landscape" />
         <activity
-            android:name=".ui.customer.CustomerActivity"
+            android:name="com.example.myapplication.ui.screen.customer.CustomerActivity"
             android:exported="false"
             android:screenOrientation="landscape" />
         <activity
-            android:name=".ui.login.MainActivity"
+            android:name="com.example.myapplication.ui.screen.login.MainActivity"
             android:exported="true"
             android:screenOrientation="landscape">
             <intent-filter>

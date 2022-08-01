@@ -4,8 +4,8 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import com.example.myapplication.core.api.response.ProductReport
-import com.example.myapplication.core.utils.Utils
+import com.example.myapplication.api.response.ProductReport
+import com.example.myapplication.utils.Utils
 import com.example.myapplication.databinding.ProductReportItemBinding
 import com.example.myapplication.ext.formatWithCurrency
 

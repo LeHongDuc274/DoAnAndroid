@@ -1,12 +1,11 @@
 package com.example.myapplication.ui.adapter
 
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.chauthai.swipereveallayout.ViewBinderHelper
-import com.example.myapplication.core.model.OrderDetail
-import com.example.myapplication.core.utils.Utils
+import com.example.myapplication.ui.model.OrderDetail
+import com.example.myapplication.utils.Utils
 import com.example.myapplication.databinding.OrderDetailItemKitchenBinding
 
 class OrderDetailKitchenAdapter(private val isLockDrag: Boolean = true) :

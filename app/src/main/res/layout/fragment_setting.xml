@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/color_background_grey"
-    tools:context=".ui.admin.SettingFragment">
+    tools:context=".ui.screen.admin.SettingFragment">
 
     <include
         layout="@layout/tool_bar"

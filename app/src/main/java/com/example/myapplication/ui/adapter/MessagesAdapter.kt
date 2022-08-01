@@ -3,7 +3,7 @@ package com.example.myapplication.ui.adapter
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.example.myapplication.core.api.response.Message
+import com.example.myapplication.api.response.Message
 import com.example.myapplication.databinding.MessageItemBinding
 
 class MessagesAdapter() : RecyclerView.Adapter<MessagesAdapter.ViewHolder>() {

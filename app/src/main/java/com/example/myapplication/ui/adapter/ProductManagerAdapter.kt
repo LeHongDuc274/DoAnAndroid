@@ -1,16 +1,11 @@
 package com.example.myapplication.ui.adapter
 
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import com.bumptech.glide.load.MultiTransformation
-import com.bumptech.glide.load.resource.bitmap.CenterCrop
-import com.bumptech.glide.load.resource.bitmap.CircleCrop
-import com.bumptech.glide.load.resource.bitmap.RoundedCorners
-import com.example.myapplication.core.model.ProductEntity
+import com.example.myapplication.ui.model.ProductEntity
 import com.example.myapplication.databinding.ProductManagerItemBinding
 import com.example.myapplication.ext.formatWithCurrency
 

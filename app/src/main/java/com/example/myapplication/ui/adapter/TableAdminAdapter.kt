@@ -4,7 +4,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.example.myapplication.core.model.User
+import com.example.myapplication.ui.model.User
 import com.example.myapplication.databinding.TableItemBinding
 
 class TableAdminAdapter() : RecyclerView.Adapter<TableAdminAdapter.ViewHolder>() {

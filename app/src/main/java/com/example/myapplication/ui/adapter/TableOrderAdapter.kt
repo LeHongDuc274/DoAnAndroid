@@ -2,13 +2,12 @@ package com.example.myapplication.ui.adapter
 
 import android.graphics.Color
 import android.graphics.PorterDuff
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.example.myapplication.core.api.response.Message
-import com.example.myapplication.core.api.response.TableOrdering
+import com.example.myapplication.api.response.Message
+import com.example.myapplication.api.response.TableOrdering
 import com.example.myapplication.databinding.TableOrderItemBinding
 
 class TableOrderAdapter : RecyclerView.Adapter<TableOrderAdapter.ViewHolder>() {

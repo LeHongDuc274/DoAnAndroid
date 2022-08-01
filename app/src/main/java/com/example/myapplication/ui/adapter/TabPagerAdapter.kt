@@ -4,10 +4,10 @@ import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentStatePagerAdapter
 import androidx.viewpager.widget.PagerAdapter
 import com.example.myapplication.core.TabItem
-import com.example.myapplication.ui.admin.ChartFragment
-import com.example.myapplication.ui.admin.ProductManagerFragment
-import com.example.myapplication.ui.admin.OrderManagerFragment
-import com.example.myapplication.ui.admin.SettingFragment
+import com.example.myapplication.ui.screen.admin.ChartFragment
+import com.example.myapplication.ui.screen.admin.ProductManagerFragment
+import com.example.myapplication.ui.screen.admin.OrderManagerFragment
+import com.example.myapplication.ui.screen.admin.SettingFragment
 
 class TabPagerAdapter(fragmentManager: FragmentManager, private val tabItems: List<TabItem>) :
     FragmentStatePagerAdapter(fragmentManager, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT) {

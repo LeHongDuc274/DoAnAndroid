@@ -5,8 +5,8 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import com.example.myapplication.core.model.CategoryEntity
-import com.example.myapplication.core.model.ProductEntity
+import com.example.myapplication.ui.model.CategoryEntity
+import com.example.myapplication.ui.model.ProductEntity
 import com.example.myapplication.databinding.CategoryItemBinding
 import com.example.myapplication.databinding.ProductItemBinding
 import com.example.myapplication.ext.formatWithCurrency

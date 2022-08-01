@@ -3,7 +3,7 @@ package com.example.myapplication.ui.adapter
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.example.myapplication.core.model.CategoryEntity
+import com.example.myapplication.ui.model.CategoryEntity
 import com.example.myapplication.databinding.CategoryItemBinding
 
 class CategoryAdapter : RecyclerView.Adapter<CategoryAdapter.ViewHolder>() {

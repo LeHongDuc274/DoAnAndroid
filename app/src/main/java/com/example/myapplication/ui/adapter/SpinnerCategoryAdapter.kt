@@ -5,7 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
-import com.example.myapplication.core.model.CategoryEntity
+import com.example.myapplication.ui.model.CategoryEntity
 import com.example.myapplication.databinding.CategorySpinnerItemBinding
 
 class SpinnerCategoryAdapter(context: Context, listData: List<CategoryEntity>) :
