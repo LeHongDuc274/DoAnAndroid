@@ -54,6 +54,11 @@ interface OrderService {
         @Query("end") end: String
     ): Call<MyResult<List<RevenueReport>>>
 
+    @GET("/orders/history")
+    fun getHistory(
+        @Query("time") time: String
+    ): Call<MyResult<List<Order>>>
+
     @GET("/reports/product")
     fun getProductReport(@Query("type") type: Int): Call<MyResult<List<ProductReport>>>
 

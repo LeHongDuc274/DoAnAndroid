@@ -11,7 +11,7 @@ import com.example.myapplication.utils.Utils
 import com.example.myapplication.databinding.OrderItemLineBinding
 import com.example.myapplication.ext.formatWithCurrency
 
-class OrderAdapter : RecyclerView.Adapter<OrderAdapter.ViewHolder>() {
+class OrderAdapter(val type: Int = TYPE_CUSTOMER) : RecyclerView.Adapter<OrderAdapter.ViewHolder>() {
     private var listOrder = mutableListOf<OrderDetail>()
     private var onDelete: ((OrderDetail) -> Unit)? = null
     private var onEdit: ((OrderDetail) -> Unit)? = null
@@ -31,7 +31,7 @@ class OrderAdapter : RecyclerView.Adapter<OrderAdapter.ViewHolder>() {
             val status = Utils.getByStatus(orderDetail.status)
             status?.let {
                 binding.tvStatus.text = it.title
-                if (it.status > ItemStatus.PENDING.status){
+                if (it.status > ItemStatus.PENDING.status && type == TYPE_CUSTOMER){
                     binding.cvDelete.visibility = View.INVISIBLE
                 } else {
                     binding.cvDelete.visibility = View.VISIBLE
@@ -42,7 +42,6 @@ class OrderAdapter : RecyclerView.Adapter<OrderAdapter.ViewHolder>() {
             } else {
                 binding.tvNote.text = orderDetail.note
             }
-
         }
     }
 
@@ -80,5 +79,9 @@ class OrderAdapter : RecyclerView.Adapter<OrderAdapter.ViewHolder>() {
     fun setData(list: MutableList<OrderDetail>) {
         listOrder = list
         notifyDataSetChanged()
+    }
+    companion object{
+        const val TYPE_ADMIN = 1
+        const val TYPE_CUSTOMER = 0
     }
 }

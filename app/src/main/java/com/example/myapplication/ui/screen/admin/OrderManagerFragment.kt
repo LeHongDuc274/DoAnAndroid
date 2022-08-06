@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.core.os.bundleOf
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
@@ -13,7 +14,9 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.myapplication.core.ItemStatus
 import com.example.myapplication.databinding.FragmentOrderManagerBinding
 import com.example.myapplication.ext.collectFlow
+import com.example.myapplication.ext.showToast
 import com.example.myapplication.ui.adapter.OrderAdapter
+import com.example.myapplication.ui.adapter.OrderAdapter.Companion.TYPE_ADMIN
 import com.example.myapplication.ui.adapter.TableOrderAdapter
 
 
@@ -22,7 +25,7 @@ class OrderManagerFragment : Fragment() {
     private var _binding: FragmentOrderManagerBinding? = null
     private val binding get() = _binding!!
     private val tableAdapter = TableOrderAdapter()
-    private val orderDetailAdapter = OrderAdapter()
+    private val orderDetailAdapter = OrderAdapter(TYPE_ADMIN)
     private val adminViewModel: AdminViewModel by lazy {
         ViewModelProvider(requireActivity())[AdminViewModel::class.java]
     }
@@ -75,12 +78,27 @@ class OrderManagerFragment : Fragment() {
             )
             sheet.show(childFragmentManager, id.toString())
         }
+        orderDetailAdapter.setDeleteClick {
+            AlertDialog.Builder(requireActivity())
+                .setTitle("Xác nhận xoá")
+                .setMessage("Bấm Xoá để xoá item này!")
+                .setPositiveButton("Xoá") { _, _ ->
+                   adminViewModel.deleteOrderDetails(it.id)
+                }
+                .setNegativeButton("Huỷ", null).show()
+        }
         binding.tvComplete.setOnClickListener {
             // Tạm thời để DELIVERING , làm màn staff xong chuyen lai thanh DELEVERED
-            if (adminViewModel.listOrderDetailsByTable.value.isEmpty() || adminViewModel.listOrderDetailsByTable.value.any { it.status < ItemStatus.DELIVERING.status }) {
-                Toast.makeText(requireActivity(), "Đơn hàng chưa hoàn thành", Toast.LENGTH_SHORT).show()
+            if (adminViewModel.listOrderDetailsByTable.value.isEmpty() || adminViewModel.listOrderDetailsByTable.value.any { it.status < ItemStatus.DELIVERED.status }) {
+                requireActivity().showToast("Đơn hàng chưa hoàn thành")
             } else {
-                adminViewModel.completeOrder()
+                AlertDialog.Builder(requireActivity())
+                    .setTitle("Xác nhận hoàn thành đơn hàng")
+                    .setMessage("Bấm Ok để Hoàn thành đơn hàng")
+                    .setPositiveButton("Ok") { _, _ ->
+                        adminViewModel.completeOrder()
+                    }
+                    .setNegativeButton("Huỷ", null).show()
             }
         }
     }

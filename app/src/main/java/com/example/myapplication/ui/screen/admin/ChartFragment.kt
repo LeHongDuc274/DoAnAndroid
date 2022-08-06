@@ -126,9 +126,13 @@ class ChartFragment : Fragment() {
         binding.tvReloadPeriodTime.setOnClickListener {
             adminVM.getRevenuePeriodTime()
         }
+        binding.tvHistory.setOnClickListener {
+            HistoryFragment().show(childFragmentManager,null)
+        }
         adminVM.getReportToday()
         adminVM.getRevenueLastWeek()
         adminVM.getRevenueAllTime()
+        adminVM.getRevenuePeriodTime()
     }
 
     private fun chooseStartTimeRevenue() {

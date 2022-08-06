@@ -39,6 +39,7 @@ class AdminViewModel(private val app: Application) : BaseViewModel(app) {
     val listOrderDetailsByTable = MutableStateFlow<MutableList<OrderDetail>>(mutableListOf())
     val listMessageRequesting = MutableStateFlow<MutableList<Message>>(mutableListOf())
     val reportToday = MutableSharedFlow<ReportToday>()
+    val listOrderHistory = MutableStateFlow<MutableList<Order>>(mutableListOf())
     val revenueLastWeek = MutableStateFlow<MutableList<RevenueReport>>(mutableListOf())
     val revenueAllTime = MutableStateFlow<MutableList<RevenueReport>>(mutableListOf())
     val revenuePeriodTime = MutableStateFlow<MutableList<RevenueReport>>(mutableListOf())
@@ -49,7 +50,10 @@ class AdminViewModel(private val app: Application) : BaseViewModel(app) {
     var tableIdSubscribe = app.UserId()
     val orderChannelSubscribe get() = String.format(ORDER_CHANNEL_FORMAT, tableIdSubscribe)
     var pageSelected = 0
-    var startTimeRevenue = Calendar.getInstance().apply { clearTime() }
+    var startTimeRevenue = Calendar.getInstance().apply {
+        add(Calendar.DAY_OF_MONTH, -7)
+        clearTime()
+    }
     var endTimeRevenue = Calendar.getInstance().apply { clearTime() }
     private var client = OkHttpClient()
     private var ws: WebSocket? = null
@@ -411,6 +415,17 @@ class AdminViewModel(private val app: Application) : BaseViewModel(app) {
         }, {}))
     }
 
+    fun getHistory(time : String = Calendar.getInstance().apply { clearTime() }.formatVN()){
+        val api = OrderService.createOrderApi(token)
+        val res = api.getHistory(time)
+        res.enqueue(MyCallback({
+            listOrderHistory.value = it.toMutableList()
+        },{
+
+        }))
+
+    }
+
     fun getReportProduct(type: Int) {
         val api = OrderService.createOrderApi(token)
         val res = api.getProductReport(type)
@@ -420,7 +435,15 @@ class AdminViewModel(private val app: Application) : BaseViewModel(app) {
             filterProductReportByCategory(categoryIdReport)
         }, {}))
     }
+    fun deleteOrderDetails(id: Int) {
+        val api = OrderService.createOrderApi(token)
+        val res = api.deleteOrderDetails(id)
+        res.enqueue(MyCallback(onSuccess = {
 
+        }, {
+
+        }))
+    }
     fun filterProductReportByCategory(productId: Int) {
         categoryIdReport = productId
         if (productId == 0) {

@@ -83,6 +83,9 @@ class ProductFormFragment : BaseDialogFragment(R.layout.fragment_product_form) {
         binding.tvEdit.setOnClickListener {
             createProduct()
         }
+        binding.tvBack.setOnClickListener {
+            dismiss()
+        }
     }
 
     private fun initViewEditMode() {
