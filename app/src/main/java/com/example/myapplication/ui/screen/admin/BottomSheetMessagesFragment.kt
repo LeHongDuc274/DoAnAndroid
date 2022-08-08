@@ -17,7 +17,7 @@ class BottomSheetMessagesFragment(private val activity: Context) : BottomSheetDi
     private var _binding: MessageBottomSheetFragmentBinding? = null
     private val binding get() = _binding!!
     private var userId = 0
-    private val messageAdapter = MessagesAdapter()
+    private val messageAdapter = MessagesAdapter(true)
     private val adminViewModel: AdminViewModel by lazy {
         ViewModelProvider(requireActivity())[AdminViewModel::class.java]
     }

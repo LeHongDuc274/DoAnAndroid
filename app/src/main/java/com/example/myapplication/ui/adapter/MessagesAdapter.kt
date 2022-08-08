@@ -1,12 +1,13 @@
 package com.example.myapplication.ui.adapter
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.example.myapplication.api.response.Message
 import com.example.myapplication.databinding.MessageItemBinding
 
-class MessagesAdapter() : RecyclerView.Adapter<MessagesAdapter.ViewHolder>() {
+class MessagesAdapter(val isAdmin : Boolean = false) : RecyclerView.Adapter<MessagesAdapter.ViewHolder>() {
     private var listMessage = mutableListOf<Message>()
     private var callback: ((Message) -> Unit)? = null
 
@@ -19,7 +20,9 @@ class MessagesAdapter() : RecyclerView.Adapter<MessagesAdapter.ViewHolder>() {
                 tvTableName.text = message.user_name
                 tvTime.text = message.created_at
             }
-
+            if (isAdmin){
+                binding.ivNext.visibility = View.GONE
+            }
         }
     }
 
