@@ -353,8 +353,10 @@ class ChartFragment : Fragment() {
             })
 
         }
-        val listCategory = adminVM.listCategories.value
-        listCategory.add(0, CategoryEntity(0, "Tất cả"))
+        val listCategory = mutableListOf<CategoryEntity>().apply {
+            addAll(adminVM.listCategories.value)
+           add(0, CategoryEntity(0, "Tất cả"))
+        }
         val spinCategoryAdapter = SpinnerCategoryAdapter(requireActivity(), listCategory)
         spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         binding.snProductReportByCategory.apply {

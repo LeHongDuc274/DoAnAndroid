@@ -1,11 +1,11 @@
 package com.example.myapplication.core
 
 const val APP_NAME = ""
-const val BASE_URL = "http://<port_number>:3000"
-const val WS_URL = "ws://<port_number>:3000/cable"
+//const val BASE_URL = "http:192.168.43.79:3000"
+//const val WS_URL = "ws://192.168.43.79:3000/cable"
 
-//const val BASE_URL = "http://192.168.1.5:3000"
-//const val WS_URL = "ws://192.168.1.5:3000/cable"
+const val BASE_URL = "http://192.168.1.5:3000"
+const val WS_URL = "ws://192.168.1.5:3000/cable"
 const val PRODUCT_EXTRA_KEY = "PRODUCT_EXTRA_KEY"
 const val USER_EXTRA_KEY = "USER_EXTRA_KEY"
 
@@ -32,7 +32,7 @@ enum class TabItem(val title: String, val icon: String, code: Int) {
 }
 
 enum class ItemStatus(val title: String, val status: Int) {
-    NONE("None", -1),
+    NONE("Chưa đặt", -1),
     PENDING("Đang chờ", 0),
     PREPARING("Đang chuẩn bị", 1),
     COMPLETED("Hoàn thành", 2),

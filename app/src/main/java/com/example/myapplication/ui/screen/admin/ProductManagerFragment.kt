@@ -1,6 +1,7 @@
 package com.example.myapplication.ui.screen.admin
 
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -46,6 +47,7 @@ class ProductManagerFragment : Fragment() {
             viewModel.setListProductByCategory()
         }
         collectFlow(viewModel.listCategories) {
+//            Log.e("lítTAg",it.toString())
             cateAdapter.setData(it)
         }
         collectFlow(viewModel.listProductFilter) {

@@ -1,6 +1,7 @@
 package com.example.myapplication.ui.screen.admin
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -64,8 +65,8 @@ class CategoriesManageFragment() : BaseDialogFragment(R.layout.fragment_categori
                 else -> adminViewModel.createCategory(binding.edtAdd.text.toString()) { b, str, category ->
                     if (b) {
                         val list = mutableListOf<CategoryEntity>().apply {
-                            add(category!!)
                             addAll(viewmodel.listCategories.value)
+                            add(category!!)
                         }
                         viewmodel.listCategories.value = list
                     }
