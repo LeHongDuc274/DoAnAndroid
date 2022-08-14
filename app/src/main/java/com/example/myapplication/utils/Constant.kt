@@ -4,8 +4,8 @@ const val APP_NAME = ""
 //const val BASE_URL = "http:192.168.43.79:3000"
 //const val WS_URL = "ws://192.168.43.79:3000/cable"
 
-const val BASE_URL = "http://192.168.1.5:3000"
-const val WS_URL = "ws://192.168.1.5:3000/cable"
+const val BASE_URL = "http://192.168.1.4:3000"
+const val WS_URL = "ws://192.168.1.4:3000/cable"
 const val PRODUCT_EXTRA_KEY = "PRODUCT_EXTRA_KEY"
 const val USER_EXTRA_KEY = "USER_EXTRA_KEY"
 

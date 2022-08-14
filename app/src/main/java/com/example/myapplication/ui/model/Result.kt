@@ -5,11 +5,6 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
-data class Result(
-    val status: Boolean,
-    var data: Any
-)
-
 data class MyResult<T>(
     val status: Boolean,
     val message: String?,

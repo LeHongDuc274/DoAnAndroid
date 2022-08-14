@@ -43,10 +43,6 @@ interface UserService {
         @Part("status") status: RequestBody
         ): Call<MyResult<User>>
 
-
-    @DELETE("/users/delete")
-    fun deleteUser(): Call<Result>
-
     @POST("/logout")
     fun logout(@Body password: RequestBody) : Call<MyResult<UserResponse>>
 

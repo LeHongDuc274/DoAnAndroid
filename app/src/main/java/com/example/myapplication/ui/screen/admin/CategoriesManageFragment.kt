@@ -1,18 +1,23 @@
 package com.example.myapplication.ui.screen.admin
 
+import android.content.DialogInterface
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.myapplication.R
 import com.example.myapplication.ui.model.CategoryEntity
 import com.example.myapplication.databinding.FragmentCategoriesManageBinding
 import com.example.myapplication.ext.collectFlow
+import com.example.myapplication.ext.showToast
 import com.example.myapplication.ui.adapter.CategoryAdapter
+import com.example.myapplication.utils.showDialogConfirmEditCategory
+import com.example.myapplication.utils.showDialogConfirmLogout
 import com.example.myapplication.utils.wiget.BaseDialogFragment
 
 class CategoriesManageFragment() : BaseDialogFragment(R.layout.fragment_categories_manage) {
@@ -50,19 +55,27 @@ class CategoriesManageFragment() : BaseDialogFragment(R.layout.fragment_categori
         collectFlow(viewmodel.listCategories) {
             categoryAdapter.setData(it)
         }
+        categoryAdapter.setOnEditClick { category ->
+            requireActivity().showDialogConfirmEditCategory(category.name_type) {
+                checkDuplicateName(it) {
+                    viewmodel.editCategory(category, it)
+                }
+            }
+        }
+        categoryAdapter.setOnDeleteClick {
+            AlertDialog.Builder(requireActivity())
+                .setTitle("Xác nhận xoá phân loại")
+                .setMessage("Lưu ý:  Chỉ phân loại trống mới có thể xoá")
+                .setPositiveButton("Ok", DialogInterface.OnClickListener { dialog, which ->
+                    viewmodel.deleteCategory(it) {
+                        requireActivity().showToast(it)
+                    }
+                })
+                .setNegativeButton("Huỷ", null).show()
+        }
         binding.tvAdd.setOnClickListener {
-            when {
-                binding.edtAdd.text.isBlank() -> {
-                    Toast.makeText(requireActivity(), "Tên không được để trống", Toast.LENGTH_LONG)
-                        .show()
-                }
-                (viewmodel.listCategories.value.any {
-                    it.name_type.equals(binding.edtAdd.text.toString())
-                }) -> {
-                    Toast.makeText(requireActivity(), "Tên không thể trùng nhau", Toast.LENGTH_LONG)
-                        .show()
-                }
-                else -> adminViewModel.createCategory(binding.edtAdd.text.toString()) { b, str, category ->
+            checkDuplicateName(binding.edtAdd.text.toString()) {
+                adminViewModel.createCategory(binding.edtAdd.text.toString()) { b, str, category ->
                     if (b) {
                         val list = mutableListOf<CategoryEntity>().apply {
                             addAll(viewmodel.listCategories.value)
@@ -85,6 +98,21 @@ class CategoriesManageFragment() : BaseDialogFragment(R.layout.fragment_categori
 
     }
 
+    private fun checkDuplicateName(name: String, callback: () -> Unit) {
+        when {
+            name.isBlank() -> {
+                Toast.makeText(requireActivity(), "Tên không được để trống", Toast.LENGTH_LONG)
+                    .show()
+            }
+            (viewmodel.listCategories.value.any {
+                it.name_type.equals(name)
+            }) -> {
+                Toast.makeText(requireActivity(), "Tên không thể trùng nhau", Toast.LENGTH_LONG)
+                    .show()
+            }
+            else -> callback()
+        }
+    }
 
     override fun onDestroy() {
         super.onDestroy()

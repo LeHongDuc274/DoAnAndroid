@@ -1,15 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:padding="8dp"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:padding="8dp">
 
     <TextView
         android:id="@+id/tv_category"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_weight="1"
         android:text="categories"
         android:textColor="@color/white"
         android:textSize="16dp"
         android:textStyle="bold" />
+    <androidx.appcompat.widget.AppCompatImageButton
+        android:id="@+id/tv_edit"
+        android:layout_width="28dp"
+        android:layout_height="28dp"
+        android:layout_marginHorizontal="12dp"
+        android:background="@drawable/edit_categories"
+        android:backgroundTint="@color/purple_500" />
+
+    <androidx.appcompat.widget.AppCompatImageButton
+        android:id="@+id/tv_delete"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:background="@drawable/delete"
+        android:padding="4dp" />
 </LinearLayout>

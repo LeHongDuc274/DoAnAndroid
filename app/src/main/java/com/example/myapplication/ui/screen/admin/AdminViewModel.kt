@@ -378,6 +378,40 @@ class AdminViewModel(private val app: Application) : BaseViewModel(app) {
         }, {}))
     }
 
+    fun editCategory(category: CategoryEntity, name_type: String){
+        val api = ProductService.createProductApi(token)
+        val res = api.editCategory(category.id,name_type)
+        res.enqueue(MyCallback({category_new->
+             val index = listCategories.value.indexOfFirst {
+                  it.id == category.id
+              }
+            if (index != -1){
+                val list = mutableListOf<CategoryEntity>().apply {
+                    addAll(listCategories.value)
+                }
+                list.removeAt(index)
+                list.add(index,category_new)
+                listCategories.value = list
+            }
+        },{}))
+    }
+
+    fun deleteCategory(category: CategoryEntity, onDone: (String) -> Unit){
+        val api = ProductService.createProductApi(token)
+        val res = api.deleteCategory(category.id)
+        res.enqueue(MyCallback({category_new->
+            val index = listCategories.value.indexOfFirst {
+                it.id == category.id
+            }
+            if (index != -1){
+                val list = mutableListOf<CategoryEntity>().apply {
+                    addAll(listCategories.value)
+                }
+                list.removeAt(index)
+                listCategories.value = list
+            }
+        },{onDone.invoke(it)}))
+    }
     fun getReportToday() {
         val api = OrderService.createOrderApi(token)
         val res = api.getReportToday()

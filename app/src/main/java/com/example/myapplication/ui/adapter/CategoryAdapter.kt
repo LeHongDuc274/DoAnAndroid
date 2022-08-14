@@ -9,6 +9,7 @@ import com.example.myapplication.databinding.CategoryItemBinding
 class CategoryAdapter : RecyclerView.Adapter<CategoryAdapter.ViewHolder>() {
     private var listCategories = mutableListOf<CategoryEntity>()
     private var onEdit: ((CategoryEntity) -> Unit)? = null
+    private var onDelete: ((CategoryEntity) -> Unit)? = null
 
     inner class ViewHolder(val binding: CategoryItemBinding) :
         RecyclerView.ViewHolder(binding.root) {
@@ -27,8 +28,11 @@ class CategoryAdapter : RecyclerView.Adapter<CategoryAdapter.ViewHolder>() {
     }
 
     private fun initListener(binding: CategoryItemBinding, holder: ViewHolder) {
-        binding.root.setOnClickListener {
+        binding.tvEdit.setOnClickListener {
             onEdit?.invoke(listCategories[holder.layoutPosition])
+        }
+        binding.tvDelete.setOnClickListener {
+            onDelete?.invoke(listCategories[holder.layoutPosition])
         }
     }
 
@@ -40,6 +44,10 @@ class CategoryAdapter : RecyclerView.Adapter<CategoryAdapter.ViewHolder>() {
 
     fun setOnEditClick(action: (CategoryEntity) -> Unit) {
         onEdit = action
+    }
+
+    fun setOnDeleteClick(action: (CategoryEntity) -> Unit) {
+        onDelete = action
     }
 
     fun setData(list: MutableList<CategoryEntity>) {

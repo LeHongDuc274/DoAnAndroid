@@ -42,10 +42,16 @@ interface ProductService {
 
     @Multipart
     @POST("/categories/create")
-    fun createCategory(@Part("name_type") name_type : RequestBody): Call<MyResult<CategoryEntity>>
+    fun createCategory(@Part("name_type") name_type: RequestBody): Call<MyResult<CategoryEntity>>
 
     @PATCH("/categories/edit")
-    fun editCategory(): Call<Result>
+    fun editCategory(
+        @Query("id") id: Int,
+        @Query("name_type") name_type: String
+    ): Call<MyResult<CategoryEntity>>
+
+    @DELETE("/categories/delete")
+    fun deleteCategory(@Query("id") id: Int): Call<MyResult<CategoryEntity>>
 
     companion object {
         fun createProductApi(token: String): ProductService {
